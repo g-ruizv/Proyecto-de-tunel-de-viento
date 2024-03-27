@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend MQTT App</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Paho JavaScript MQTT Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+</head>
+<body class="container mt-5">
+    <h1 class="mb-4">Frontend MQTT App</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <p>Status: <span id="status">-</span></p>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-primary mr-2" onclick="startProcedure()">Start Procedure</button>
+            <button class="btn btn-danger" onclick="getAllControllers()">Cancel Procedure</button>
+            <button class="btn btn-danger" onclick="cancelProcedure()">Cancel Procedure</button>
+        </div>
+        <div class="container mt-5">
+            <h1>Dynamic Sliders Example</h1>
+            <div id="sliderContainer"></div>
+            <button type="button" class="btn btn-primary mt-3" onclick="getValue()">Update Sliders</button>
+            <p id="sliderValue"></p>
+          </div>
+    </div>
+
+    <script>
+        var controllerIds = ["id1","id2"];
+
+
+
+        var mqttClient = new Paho.MQTT.Client('broker.hivemq.com', 8000, '5a0d6a66b35b476a8653e7edb84528df');
+
+        mqttClient.onConnectionLost = function (responseObject) {
+            if (responseObject.errorCode !== 0) {
+                console.log('Connection lost: ' + responseObject.errorMessage);
+            }
+        };
+
+        mqttClient.onMessageArrived = function (message) {
+            // Update status on message arrival
+            document.getElementById('status').innerText = message.payloadString;
+        };
+
+        mqttClient.connect({
+            onSuccess: function () {
+                console.log('Connected to HiveMQ broker');
+                mqttClient.subscribe('fanWall/wall/control');
+                mqttClient.subscribe('fanWall/wall/status');
+                mqttClient.subscribe('fanWall/wall/id');
+            },
+            onFailure: function (message) {
+                console.log('Connection failed: ' + message.errorMessage);
+            },
+        });
+
+
+        mqttClient.onMessageArrived = function (message) {
+            // Update status on message arrival
+            document.getElementById('status').innerText = message.payloadString;
+            console.log(message.payloadString);
+            if (message.destinationName === 'fanWall/wall/id' && message.payloadString !=='get') {
+                console.log('Received ID: ' + message.payloadString);
+                controllerIds.push(message.payloadString);
+            }
+        };
+        updateSliders();
+        function getValue(id) {
+            console.log(id);
+            // Get the slider element
+            var slider = document.getElementById(id);
+            // Get the value of the slider
+            var value = slider.value;
+            // Display the value
+            document.getElementById("sliderValue").innerHTML = "Slider Value: " + value;
+            // Call a function or perform any action with the value here
+            // For example, you can pass the value to another function
+            console.log('Slider value: ' + value);
+            //for (var i = 0; i < controllerIds.length; i++) {
+            //    setSpeed(value,controllerIds[i]);
+            //}
+            setSpeed(value,id);
+        }
+
+        function setSpeed(speed,id) {
+            console.log('Setting speed to ' + speed);
+            var message = new Paho.MQTT.Message(id + '/' + speed);
+            message.destinationName = 'fanWall/wall/control';
+            mqttClient.send(message);
+        }	
+
+        function startProcedure() {
+            var command = 'start';
+            var message = new Paho.MQTT.Message(command);
+            message.destinationName = 'fanWall/wall/control';
+            mqttClient.send(message);
+        }
+
+        function cancelProcedure() {
+            var random = Math.floor(Math.random() * 4000);
+            var command = random.toString();
+            console.log(command);
+            var message = new Paho.MQTT.Message(command);
+            message.destinationName = 'fanWall/wall/control';
+            mqttClient.send(message);
+        }
+
+        function getAllControllers() {
+            var message = new Paho.MQTT.Message('get');
+            controllerIds = [];
+            message.destinationName = 'fanWall/wall/id';
+            mqttClient.send(message);
+        }
+
+        function updateSliders(){
+            controllerIds.forEach(function(id){
+                var slider = document.createElement("input");
+                slider.type = "range";
+                slider.min = "0";
+                slider.max = "100";
+                slider.value = "50";
+                slider.id = id;
+                slider.onmouseup = function() {
+                    getValue(id);
+                };
+                document.getElementById("sliderContainer").appendChild(slider);
+            });
+        }
+
+    </script>
+</body>
+</html>
