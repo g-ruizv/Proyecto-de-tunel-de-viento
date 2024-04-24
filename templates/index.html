@@ -30,41 +30,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frontend MQTT App</title>
+    <title>FanWall</title>
     <!-- Bootstrap CSS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Paho JavaScript MQTT Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 </head>
-<body class="container mt-5">
-    <h1 class="mb-4">Frontend MQTT App</h1>
+<body class="container mt-6">
+    <h1 class="mb-4">FanWall</h1>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <p>Status: <span id="status">-</span></p>
         </div>
         <div class="col-md-6">
             <button class="btn btn-primary mr-2" onclick="startProcedure()">Start Procedure</button>
-            <button class="btn btn-danger" onclick="getAllControllers()">Get controllers</button>
-            <button class="btn btn-danger" onclick="cancelProcedure()">Cancel Procedure</button>
+            <button class="btn btn-primary" onclick="getAllControllers()">Get controllers</button>
         </div>
-        <div class="container mt-5">
-            <h1>Dynamic Sliders Example</h1>
-            <div id="sliderContainer"></div>
-            <button type="button" class="btn btn-primary mt-3" onclick="getValue()">Update Sliders</button>
-            <p id="sliderValue"></p>
-          </div>
-    </div>
-    <button onclick="exportGridAsMatrix()">Export Grid IDs</button>
-    <div class="grid-stack" gs-w="3" gs-min-row="12"></div>
+        <div class="col-md-2">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Select Configuration
+                </button>
+                <div class="dropdown-menu" id="configDropdown" aria-labelledby="dropdownMenuButton">
+            </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+            </div >
+        </div>
+    </div>
+    
+    <div class="grid-stack" gs-w="3" gs-min-row="12"></div>
+    <div class="row">
+        <div class="col-md-6">
+            <button class="btn btn-primary  ml-auto"  onclick="exportGridAsMatrix()">Export Grid IDs</button>
+        </div>
+    </div>
+
+    
     <script>
         
         var options = {
             cellHeight: 80,
-
             verticalMargin: 10,
-            
             width: 12,
             minHeight: 4,
             float: true,
@@ -74,7 +81,7 @@
 
         var grid = GridStack.init(options);
         var controllerIds = ["id1","id2","id3"];
-
+        getConfigurations();
 
 
         var mqttClient = new Paho.MQTT.Client('broker.hivemq.com', 8000, '5a0d6a66b35b476a8653e7edb84528df');
@@ -112,7 +119,6 @@
 
                 if (!controllerIds.includes(message.payloadString)){
                     controllerIds.push(message.payloadString);
-                    controllerIds.push("aaa");
                     console.log(controllerIds);
                     updateSliders();
                 }
@@ -127,7 +133,7 @@
             // Get the value of the slider
             var value = slider.value;
             // Display the value
-            document.getElementById("sliderValue").innerHTML = "Slider Value: " + value;
+            //document.getElementById("sliderValue").innerHTML = "Slider Value: " + value;
             // Call a function or perform any action with the value here
             // For example, you can pass the value to another function
             console.log('Slider value: ' + value);
@@ -209,6 +215,31 @@
 
             console.log('Grid Matrix:', gridMatrix);
         };
+
+        function getConfigurations() {
+            fetch('/api/v1/fanWall/configurations')
+                .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+                })
+                .then(data => {
+                    const dropdown = document.getElementById('configDropdown');
+                    dropdown.innerHTML = ''; // Clear existing options
+
+                    data.configurations.forEach(configId => {
+                    const option = document.createElement('a');
+                    option.classList.add('dropdown-item');
+                    option.href = '#'; // Add link behavior if needed
+                    option.textContent = `Configuration ${configId}`;
+                    dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
         
 
     </script>
