@@ -4,9 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from . import app, db
 from .models import Controller
 
-
-
-
 @app.route('/api/v1/fanWall/controllers', methods=['GET'])
 @cross_origin()
 def get_controllers():
