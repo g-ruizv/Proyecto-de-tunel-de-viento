@@ -23,5 +23,8 @@ def handle_message(message):
     elif message_type == 'config_update':
         print('Received config update:', message_data)
         # Handle configuration update
+    elif message_type == 'activate':
+        if message_data == 'start':
+            send_mqtt_message('fanWall/wall/control', 'start', mqtt_client)
     else:
         print('Unknown message type')
