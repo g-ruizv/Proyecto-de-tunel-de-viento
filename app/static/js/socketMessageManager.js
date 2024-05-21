@@ -8,8 +8,15 @@ function addControllerSocket(id, controllerName) {
 }
 
 function getAllControllers() {
-    const getControllers = createMessage(MessageType.CONTROLLER_INFORMATION,'get');
+    var command = 'get';
+    const getControllers = createMessage(MessageType.CONTROLLER_INFORMATION,command);
     socket.emit('fanControl', getControllers);
+}
+
+function startProcedure() {
+    var command = 'start';
+    const startProcedure = createMessage(MessageType.ACTIVATE, command);
+    socket.emit('fanControl', startProcedure);
 }
 
 function setControllerSpeed(speed,id) {
