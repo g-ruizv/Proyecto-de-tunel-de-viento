@@ -3,6 +3,7 @@
     <script src="./static/node_modules/gridstack/dist/gridstack-all.js"></script>
     <link href="./static/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet"/>
 <head>
+    <link rel="shortcut icon" href="./static/favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FanWall</title>
@@ -27,6 +28,7 @@
         <div class="col-md-6">
             <button class="btn btn-primary mr-2" onclick="startProcedure()">Start Procedure</button>
             <button class="btn btn-primary" onclick="getAllControllers()">Get controllers</button>
+            <button class="btn btn-primary" onclick="addMultipleControllers()">Get controllers</button>
         </div>
         <div class="col-md-2">
             <div class="dropdown">
@@ -39,7 +41,7 @@
         </div>
         <div class="col-md-2">
             <div class="d-flex justify-content-end">
-                <button class="btn btn-primary  ml-auto"  onclick="exportGridAsMatrix()">Save</button>
+                <button class="btn btn-primary  ml-auto"  onclick="saveConfiguration(2)">Save</button>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                     Create New
                 </button>
@@ -68,7 +70,7 @@
                 <input type="text" class="form-control" id="newConfigurationNameInputBox" placeholder="Grid 1">
             </div>
             <div class="modal-footer">
-            <button class="btn btn-primary  ml-auto"  onclick="exportGridAsMatrix()">Create</button>
+            <button class="btn btn-primary  ml-auto"  onclick="saveConfiguration()">Create</button>
             </div>
         </div>
         </div>
@@ -80,37 +82,6 @@
     <script src="./static/js/socketio.js"></script>
     <script src="./static/js/socketMessageManager.js"></script>
     <script src="./static/js/ui.js"></script>
-    <script>
-        
-        function addController(id, controllerName) {
-            const postData = {
-                name: controllerName
-            };
-
-            fetch(`/api/v1/fanWall/controllers/${id}`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response from server:', data);
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-        }
-        //updateSliders();
-
-        
-
-    </script>
+    <script src="./static/js/requests.js"></script>
 </body>
 </html>
