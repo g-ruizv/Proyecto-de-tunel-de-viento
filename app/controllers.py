@@ -29,6 +29,20 @@ def add_controller(id):
     else:
         return {'error': 'Controller already exists'}
 
+@app.route('/api/v1/fanWall/addMultipleControllers/', methods=['POST'])
+@cross_origin()
+def add_multiple_controllers():
+    for controller in request.json['controllers']:
+        controller_id = controller['id']
+        controller_name = controller['name']
+        controller = Controller.query.get(controller_id)
+        if controller is None:
+            controller = Controller(id=controller_id)
+            controller.name = controller_name
+            db.session.add(controller)
+    db.session.commit()
+    return {'success': 'Controllers added'}
+
 @app.route('/api/v1/fanWall/controllers/<id>', methods=['DELETE'])
 @cross_origin()
 def delete_controller(id):
