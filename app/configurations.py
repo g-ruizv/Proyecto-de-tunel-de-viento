@@ -7,7 +7,10 @@ from .models import Configuration
 @cross_origin()
 def get_configurations():
     configurations = Configuration.query.all()
-    return {'configurations': [configuration.name for configuration in configurations]}
+    return {'configurations': [
+        {'id':configuration.id,'name':configuration.name} 
+        for configuration in configurations
+        ]}
 
 @app.route('/api/v1/fanWall/configurations/<id>', methods=['POST'])
 @cross_origin()
