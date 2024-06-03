@@ -43,6 +43,13 @@ $(document).on('mouseup', '.slider', function() {
     getValue(id);
 });
 
+$(document).on('click', '#configDropdown .dropdown-item', function() {
+    // Handle configuration selection
+    var id = $(this).attr('id');
+    console.log('Configuration selected:', id);
+    importConfiguration(id);
+});
+
 
 
 function getConfigurations() {
@@ -57,12 +64,14 @@ function getConfigurations() {
             const dropdown = document.getElementById('configDropdown');
             dropdown.innerHTML = ''; // Clear existing options
             console.log(data);
-            data.configurations.forEach(configId => {
-            const option = document.createElement('a');
-            option.classList.add('dropdown-item');
-            option.href = '#'; // Add link behavior if needed
-            option.textContent = `Configuration ${configId}`;
-            dropdown.appendChild(option);
+            data.configurations.forEach(configuration => {
+                const option = document.createElement('a');
+                option.classList.add('dropdown-item');
+                option.href = '#'; // Add link behavior if needed
+                console.log(configuration);
+                option.id = `${configuration.id}`;
+                option.textContent = `Configuration ${configuration.name}`;
+                dropdown.appendChild(option);
             });
         })
         .catch(error => {
