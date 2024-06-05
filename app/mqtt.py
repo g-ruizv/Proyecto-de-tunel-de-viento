@@ -1,6 +1,7 @@
 import threading
 from flask_socketio import emit
 from . import mqtt_client, app, socketio
+import time
 
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print(f"Connected with result code {reason_code}")
@@ -13,6 +14,21 @@ def on_message(client, userdata, msg):
         print(f"Received message from {msg.topic}: {msg.payload}")
         with app.app_context():
             socketio.emit('fanId', {'id': msg.payload.decode('utf-8')})
+
+def on_disconnect(client, userdata, rc):
+    print(f"Disconnected with result code {rc}")
+    if rc != 0:
+        print("Reconnecting")
+        try_reconnect(client)
+
+def try_reconnect(client):
+    while True:
+        try:
+            client.reconnect()
+            break
+        except Exception as e:
+            print(f"Reconnect failed: {e}")
+            time.sleep(5)
 
 def mqtt_thread():
     mqtt_client.on_connect = on_connect
@@ -30,6 +46,7 @@ def mqtt_start():
     with app.app_context():
         mqtt_client.on_connect = on_connect
         mqtt_client.on_message = on_message
+        mqtt_client.on_disconnect = on_disconnect
         mqtt_client.connect('broker.hivemq.com', 1883)
         print("Connected to MQTT broker")
         mqtt_client.loop_start()
