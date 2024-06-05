@@ -23,7 +23,7 @@ function createMessage(type, data) {
 }
 
 var grid = GridStack.init(options);
-var controllerIds = ["id1","id2","id3"];
+var controllerIds = ["id1","id2","id3","id4"];
 getConfigurations();
 updateSliders();
 
@@ -52,32 +52,7 @@ $(document).on('click', '#configDropdown .dropdown-item', function() {
 
 
 
-function getConfigurations() {
-    fetch('/api/v1/fanWall/configurations')
-        .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-        })
-        .then(data => {
-            const dropdown = document.getElementById('configDropdown');
-            dropdown.innerHTML = ''; // Clear existing options
-            console.log(data);
-            data.configurations.forEach(configuration => {
-                const option = document.createElement('a');
-                option.classList.add('dropdown-item');
-                option.href = '#'; // Add link behavior if needed
-                console.log(configuration);
-                option.id = `${configuration.id}`;
-                option.textContent = `Configuration ${configuration.name}`;
-                dropdown.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-}
+
 
 function updateSliders(){
     controllerIds.forEach(function(id){
