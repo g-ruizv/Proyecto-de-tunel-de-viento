@@ -34,6 +34,16 @@ def add_preset(id):
         return {'id': preset.id, 'name': preset.name, 'data': preset.data}
     else:
         return {'error': 'Preset already exists'}
+
+@app.route('/api/v1/fanWall/presets', methods=['POST'])
+@cross_origin()
+def add_new_preset():
+    preset = Preset()
+    preset.name = request.json['name']
+    preset.data = request.json['data']
+    db.session.add(preset)
+    db.session.commit()
+    return {'id': preset.id, 'name': preset.name, 'data': preset.data}
     
 @app.route('/api/v1/fanWall/presets/<id>', methods=['DELETE'])
 @cross_origin()
