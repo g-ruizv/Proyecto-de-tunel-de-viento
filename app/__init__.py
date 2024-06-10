@@ -21,9 +21,4 @@ def create_app():
         models.db.create_all()
 
     mqtt.mqtt_start()
-    print(queries.get_matrix_from_config(10))
-    print(queries.get_size_of_config(10))
-    print(queries.get_controller_count(10))
-    print(queries.is_config_square(10))
-    print(functions.generate_config_matrix(10))
     return app
