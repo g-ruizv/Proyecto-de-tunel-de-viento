@@ -23,16 +23,3 @@ mqttClient.connect({
     },
 });
 
-mqttClient.onMessageArrived = function (message) {
-    // Update status on message arrival
-    document.getElementById('status').innerText = message.payloadString;
-    console.log(message.payloadString);
-    if (message.destinationName === 'fanWall/wall/id' && message.payloadString !=='get') {
-        console.log('Received ID: ' + message.payloadString);
-        if (!controllerIds.includes(message.payloadString)){
-            controllerIds.push(message.payloadString);
-            console.log(controllerIds);
-            addSlider(message.payloadString);
-        }
-    }
-};
