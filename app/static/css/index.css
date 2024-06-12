@@ -1,3 +1,12 @@
+.available {
+    background-color: green !important; /* Available items are green */
+}
+
+.unavailable {
+    background-color: grey !important; /* Unavailable items are red */
+}
+
+
 .grid-stack { 
     background: #e9e9e9; 
     border: 3px solid #000;
@@ -7,14 +16,11 @@
     height: 750%;
 }
 
-.grid-stack-item-content {
-    border: 1px solid #ccc;
-    padding: 10px;
-}
 
-.square-wrapper {
-    width: 80px; /* Fixed width */
-    height: 80px; /* Fixed height to create a square */
+
+.grid-stack-item {
+    width: calc(100% / 12); /* Set the width for each grid item */
+    height: 50px; /* Fixed height to create a square */
     text-align: center; /* Center-align the content */
     margin: 0 auto; /* Center the square horizontally */
     justify-content: center;
