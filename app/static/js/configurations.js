@@ -16,13 +16,66 @@ function exportGridAsMatrix() {
 
 function importGridFromJSON(configuration) {
     grid.removeAll();
+    controllerIds = [];
     console.log('Importing grid from JSON:', configuration);
     for (var key in configuration) {
         var cell = configuration[key];
-        var itemHtml = '<div class="square-wrapper"><br><br><label class="slider-label" for="' + key + '">' + key + '</label><input type="range" min="0" max="100" value="50" class="slider" id="' + key + '"></div>';
+        var itemHtml = '<div class="unavailable"><br><br><label class="slider-label" for="' + key + '">' + key + '</label><input type="range" min="0" max="100" value="50" class="slider" id="' + key + '"></div>';
         grid.addWidget(itemHtml, {w: 2, h: 2, x: cell.x,y: cell.y,id:key ,noResize: true});
+        controllerIds.push(key);
     }
     
+}
+
+function areGridItemsRectangular(){
+    var gridSize = getGridSize();
+    if(getGridCount()==gridSize[0]*gridSize[1]){
+        return true;
+    }
+    return false;
+}
+
+function getGridCorners() {
+    var items = grid.engine.nodes;
+    var minX = Infinity;
+    var minY = Infinity;
+    var maxX = -Infinity;
+    var maxY = -Infinity;
+    
+    items.forEach(function(item) {
+        if (item.x < minX) {
+            minX = item.x;
+        }
+        if (item.y < minY) {
+            minY = item.y;
+        }
+        if (item.x > maxX) {
+            maxX = item.x;
+        }
+        if (item.y > maxY) {
+            maxY = item.y;
+        }
+    });
+    
+    return [minX, minY, maxX, maxY];
+}
+
+function getGridCount(){
+    var items = grid.engine.nodes;
+    return items.length;
+}
+
+function getGridSize() {
+    var corners = getGridCorners();
+    console.log(corners);
+    var minX = corners[0];
+    var minY = corners[1];
+    var maxX = corners[2];
+    var maxY = corners[3];
+    var width = (maxX - minX)/2 + 1;
+    var height = (maxY - minY)/2 + 1;
+    console.log("Width: " + width + " Height: " + height);
+    return [width, height];
 }
 
 function getControllerNamesAndIds(){
