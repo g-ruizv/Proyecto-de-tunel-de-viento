@@ -101,6 +101,40 @@ function getPresets() {
         });
 }
 
+function getSameSizePresets(){
+    gridSize = getGridSize();
+    isRectangular = areGridItemsRectangular();
+    if (isRectangular == false){
+        console.log('Grid items are not rectangular');
+        return;
+    }
+    fetch(`/api/v1/fanWall/presets/same_size/${gridSize[0]}/${gridSize[1]}`)
+        .then(response => {
+            if (!response.ok) {
+            throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const dropdown = document.getElementById('presetDropdown');
+            dropdown.innerHTML = ''; // Clear existing options
+            console.log(data);
+            data.presets.forEach(preset => {
+                const option = document.createElement('a');
+                option.classList.add('dropdown-item');
+                option.href = '#'; // Add link behavior if needed
+                console.log(preset);
+                option.id = `${preset.id}`;
+                option.textContent = `Preset ${preset.name}`;
+                dropdown.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+
+}
+
 function createConfiguration(id, configurationName){
     const postData = {
         name: configurationName
@@ -236,6 +270,63 @@ function importConfiguration(configurationId){
         currentConfiguration.id = configurationId;
         currentConfiguration.name = data.name;
         document.getElementById('currentConfiguration').textContent = data.name;
+        getSameSizePresets();
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+}
+
+function importPreset(presetId){
+    console.log('Importing preset...');
+    fetch(`/api/v1/fanWall/presets/${presetId}`)
+    .then(response => {
+        if (!response.ok) {
+        throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response from server:', data);
+        currentPreset.id = presetId;
+        currentPreset.name = data.name;
+        document.getElementById('currentPreset').textContent = data.name;
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+}
+
+function runPreset(){
+    startProcedure()
+    console.log('Running preset...');
+    fetch(`/api/v1/fanWall/presets/${currentPreset.id}/configuration/${currentConfiguration.id}`)
+    .then(response => {
+        if (!response.ok) {
+        throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response from server:', data);
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+}
+
+function stopPreset(){
+    console.log('Stopping preset...');
+    fetch(`/api/v1/fanWall/presets/${currentPreset.id}/configuration/${currentConfiguration.id}/stop`)
+    .then(response => {
+        if (!response.ok) {
+        throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response from server:', data);
+        stopProcedure()
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
