@@ -1,10 +1,18 @@
 var options = {
-    cellHeight: 70,
-    cellWidth: 60,
+    cellHeight: '70px',
+    cellWidth: '70px',
+    column: 12,
     verticalMargin: 10,
-    width: 12,
     minHeight: 4,
     float: true,
+};
+
+var smallGridOptions = {
+    staticGrid: true,
+    cellHeight: '50px',
+    float: true,
+    column: 12,
+    
 };
 
 const MessageType = {
@@ -24,8 +32,11 @@ function createMessage(type, data) {
 }
 
 var grid = GridStack.init(options);
+var smallGrid = GridStack.init(smallGridOptions, '.grid-stack-sm');
 var controllerIds = ["id1","id2","id3","id4"];
 getConfigurations();
+//getPresets();
+getSameSizePresets();
 updateSliders();
 
 function getValue(id) {
@@ -50,8 +61,33 @@ $(document).on('click', '#configDropdown .dropdown-item', function() {
     console.log('Configuration selected:', id);
     importConfiguration(id);
 });
+$(document).on('click', '#presetDropdown .dropdown-item', function() {
+    // Handle configuration selection
+    var id = $(this).attr('id');
+    console.log('Configuration selected:', id);
+    importPreset(id);
+});
 
+function copyGridData() {
+    // Get data from the main grid
+    var mainGridData = grid.save(false);
 
+    // Remove all widgets from the smaller grid
+    smallGrid.removeAll();
+    
+    // Add widgets to the smaller grid
+    mainGridData.forEach(function(widget) {
+
+        // Add the widget to the smaller grid
+        smallGrid.addWidget({
+            x: Math.floor(widget.x / 2),
+            y: Math.floor(widget.y / 2),
+            w: 1,
+            h: 1,
+            id: widget.id+"-small",
+        });
+    });
+}
 
 
 
@@ -59,6 +95,7 @@ function updateSliders(){
     controllerIds.forEach(function(id){
         addSlider(id);
     });
+    updateControllerAvailability("id1", true);
 }
 
 function addSlider(id){
@@ -71,8 +108,24 @@ function addSlider(id){
     slider.onmouseup = function() {
         getValue();
     };
-    var itemHtml = '<div class="square-wrapper"><br><br><label class="slider-label" for="' + id + '">' + id + '</label><input type="range" min="0" max="100" value="50" class="slider" id="' + id + '"></div>';
+    var itemHtml = '<div class="unavailable"><br><br><label class="slider-label" for="' + id + '">' + id + '</label><input type="range" min="0" max="100" value="50" class="slider" id="' + id + '"></div>';
     grid.addWidget(itemHtml, {w: 2, h: 2, id:id ,noResize: true});
+}
+
+function updateControllerAvailability(sliderId, isAvailable) {
+    var sliderElement = document.getElementById(sliderId);
+    if (sliderElement) {
+        var itemElement = sliderElement.closest('.grid-stack-item');
+        if (itemElement) {
+            if (isAvailable) {
+                itemElement.classList.add('available');
+                itemElement.classList.remove('unavailable');
+            } else {
+                itemElement.classList.add('unavailable');
+                itemElement.classList.remove('available');
+            }
+        }
+    }
 }
 
 $(document).on('mouseup', '.slider', function() {
@@ -80,3 +133,32 @@ $(document).on('mouseup', '.slider', function() {
     getValue(id);
 
 });
+
+$('#loadPresetModal').on('show.bs.modal', function () {
+    copyGridData();
+});
+
+function calculateGradientColor(value, colorA, colorB) {
+    var rA = parseInt(colorA.slice(1, 3), 16);
+    var gA = parseInt(colorA.slice(3, 5), 16);
+    var bA = parseInt(colorA.slice(5, 7), 16);
+
+    var rB = parseInt(colorB.slice(1, 3), 16);
+    var gB = parseInt(colorB.slice(3, 5), 16);
+    var bB = parseInt(colorB.slice(5, 7), 16);
+
+    var r = Math.round(rA + (rB - rA) * (value / 100));
+    var g = Math.round(gA + (gB - gA) * (value / 100));
+    var b = Math.round(bA + (bB - bA) * (value / 100));
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+// Function to update the color of a small grid widget
+function updateSmallGridItemColor(widgetId, value, colorA, colorB) {
+    var itemElement = document.getElementById(widgetId);
+    if (itemElement) {
+        var gradientColor = calculateGradientColor(value, colorA, colorB);
+        itemElement.style.backgroundColor = gradientColor;
+    }
+}
