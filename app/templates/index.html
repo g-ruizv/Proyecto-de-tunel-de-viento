@@ -3,6 +3,7 @@
 <head>
     <script src="./static/node_modules/gridstack/dist/gridstack-all.js"></script>
     <link href="./static/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet"/>
+    <link href="./static/node_modules/gridstack/dist/gridstack-extra.min.css" rel="stylesheet"/>
     <link rel="shortcut icon" href="./static/favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,12 +23,11 @@
         <div class="col-md-2 bg-light sidebar">
             <h1 class="mb-4">FanWall</h1>
             <p>Status: <span id="status">-</span></p>
-            <button class="btn btn-primary mb-2" onclick="startProcedure()">Start Procedure</button>
             
-            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#savePresetModal">Load config</button>
+            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#savePresetModal">Create preset</button>
+            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#loadPresetModal">Load preset</button>
         </div>
         <div class="col-md-10">
-            
             <div class="top-bar d-flex justify-content-end mb-4">
                 <div class = "col-md-2">
                     <button class="btn btn-primary mb-2" onclick="getAllControllers()">Get controllers</button>
@@ -55,7 +55,9 @@
                 </div>
                 
             </div>
-            <div class="grid-stack" gs-w="3" gs-min-row="12"></div>
+            <div class="col-md-8">
+                <div class="grid-stack" gs-w="13" gs-min-row="12" ></div>
+            </div>
         </div>
     </div>
     
@@ -94,6 +96,34 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary" onclick="savePreset()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="loadPresetModal" tabindex="-1" aria-labelledby="loadPresetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loadPresetModalLabel">Auto mode </h5>
+                    <div class="dropdown mb-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="presetDropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Select Preset
+                        </button>
+                        <div class="dropdown-menu" id="presetDropdown" aria-labelledby="presetDropdownMenuButton"></div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <h6 class="mb-0">Preset:</h6>
+                        <span id="currentPreset" class="badge bg-secondary ms-2">None</span>
+                    </div>  
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="grid-stack grid-stack-sm" gs-w="3" gs-min-row="12"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="runPreset()">Start</button>
+                    <button class="btn btn-secondary" onclick="stopPreset()">Stop</button>
                 </div>
             </div>
         </div>
