@@ -2,7 +2,7 @@ import threading
 from flask_socketio import emit
 from . import mqtt_client, app, socketio
 import time
-
+last_speeds = {}
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print(f"Connected with result code {reason_code}")
     client.subscribe('fanWall/wall/control')
@@ -14,6 +14,17 @@ def on_message(client, userdata, msg):
         print(f"Received message from {msg.topic}: {msg.payload}")
         with app.app_context():
             socketio.emit('fanId', {'id': msg.payload.decode('utf-8')})
+    if msg.topic == 'fanWall/wall/status':
+        print(f"Received message from {msg.topic}: {msg.payload}")
+        msg.payload = msg.payload.decode('utf-8')
+        message = msg.payload.split('/')
+        if message[0] == 'Connected':
+            with app.app_context():
+                if message[1] not in last_speeds.keys():
+                    last_speeds[message[1]] = 0
+                send_mqtt_message('fanWall/wall/'+message[1], last_speeds[message[1]], mqtt_client)
+                
+
 
 def on_disconnect(client, userdata, rc):
     print(f"Disconnected with result code {rc}")
@@ -51,7 +62,11 @@ def mqtt_start():
         print("Connected to MQTT broker")
         mqtt_client.loop_start()
 
-def send_mqtt_message(topic, message, client):
+def send_mqtt_message(topic, message, client,setSpeed=False):
     with app.app_context():
         print(f"Sending message to {topic}: {message}")
         client.publish(topic, message)
+        if setSpeed:
+            last_speeds[topic.split('/')[-1]] = message
+            print('last_speeds')
+            print(last_speeds)
