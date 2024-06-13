@@ -33,7 +33,7 @@ function createMessage(type, data) {
 
 var grid = GridStack.init(options);
 var smallGrid = GridStack.init(smallGridOptions, '.grid-stack-sm');
-var controllerIds = ["id1","id2","id3","id4"];
+var controllerIds = [];
 getConfigurations();
 //getPresets();
 getSameSizePresets();
