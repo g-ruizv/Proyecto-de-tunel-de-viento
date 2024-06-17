@@ -100,6 +100,6 @@ def run_preset(preset,matrix):
                 for j in range(len(frame['matrix'][i])):                  
                     controllerId = matrix[i][j]
                     controllerSetSpeed = frame['matrix'][i][j]
-                    send_mqtt_message('fanwall/wall/' + controllerId,controllerSetSpeed,mqtt_client)
+                    send_mqtt_message('fanWall/wall/' + controllerId,controllerSetSpeed,mqtt_client)
                     send_fan_speed(controllerId, controllerSetSpeed)
             sleep(frame['time']/1000)   
