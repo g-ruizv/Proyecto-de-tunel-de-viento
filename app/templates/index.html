@@ -32,8 +32,13 @@
                 <div class = "col-md-2">
                     <button class="btn btn-primary mb-2" onclick="getAllControllers()">Get controllers</button>
                 </div>
-                <div class = "col-md-2">
+                <div class = "col-md-1.5">
                     <button class="btn btn-primary mb-2" onclick="addMultipleControllers()">Add Multiple Controllers</button>
+                </div>
+                <div class = "col-md-1">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editControllerModal">
+                        Edit controller
+                    </button>
                 </div>
                 <div class="col-md-3 d-flex align-items-center">
                     <h6 class="mb-0">Configuration:</h6>
@@ -124,6 +129,35 @@
                 <div class="modal-footer">
                     <button class="btn btn-primary" onclick="runPreset()">Start</button>
                     <button class="btn btn-secondary" onclick="stopPreset()">Stop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit controller modal -->
+    <div class="modal fade" id="editControllerModal" tabindex="-1" aria-labelledby="editControllerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editControllerModalLabel">Update Controller</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateForm">
+                        <div class="mb-3">
+                            <label for="controllerSelect" class="form-label">Select Controller</label>
+                            <select class="form-select" id="controllerSelect" required>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="controllerValue" class="form-label">Value</label>
+                            <input type="text" class="form-control" id="controllerValue" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="updateController()">Save changes</button>
                 </div>
             </div>
         </div>
