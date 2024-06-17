@@ -8,7 +8,8 @@ from .models import Controller
 @cross_origin()
 def get_controllers():
     controllers = Controller.query.all()
-    return {'controllers': [controller.id for controller in controllers]}
+    return {'controllers': [{'id':controller.id,'name':controller.name}  
+                            for controller in controllers]}
 
 @app.route('/api/v1/fanWall/controllers/<id>', methods=['GET'])
 @cross_origin()
@@ -50,3 +51,11 @@ def delete_controller(id):
     db.session.delete(controller)
     db.session.commit()
     return {'id': controller.id, 'name': controller.name, 'x_coordinate': controller.x_coordinate, 'y_coordinate': controller.y_coordinate}
+
+@app.route('/api/v1/fanWall/controllers/<id>', methods=['PUT'])
+@cross_origin()
+def update_controller(id):
+    controller = Controller.query.get(id)
+    controller.name = request.json['name']
+    db.session.commit()
+    return {'id': controller.id, 'name': controller.name}
