@@ -138,6 +138,9 @@ $('#loadPresetModal').on('show.bs.modal', function () {
     copyGridData();
 });
 
+$('#editControllerModal').on('show.bs.modal', getControllers);
+
+
 function calculateGradientColor(value, colorA, colorB) {
     var rA = parseInt(colorA.slice(1, 3), 16);
     var gA = parseInt(colorA.slice(3, 5), 16);
