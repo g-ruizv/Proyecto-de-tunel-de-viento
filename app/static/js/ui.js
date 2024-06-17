@@ -50,11 +50,6 @@ function getValue(id) {
 
 // Include other UI interaction functions here
 
-$(document).on('mouseup', '.slider', function() {
-    var id = $(this).attr('id');
-    getValue(id);
-});
-
 $(document).on('click', '#configDropdown .dropdown-item', function() {
     // Handle configuration selection
     var id = $(this).attr('id');
