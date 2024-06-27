@@ -19,13 +19,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
 </head>
 <body class="container-fluid">
+    <div id="alert-placeholder"></div>
     <div class="row">
         <div class="col-md-2 bg-light sidebar">
             <h1 class="mb-4">FanWall</h1>
             <p>Status: <span id="status">-</span></p>
             
             <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#savePresetModal">Create preset</button>
-            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#loadPresetModal">Load preset</button>
+            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#loadPresetModal" id="loadPresetButton">Load preset</button>
         </div>
         <div class="col-md-10">
             <div class="top-bar d-flex justify-content-end mb-4">
