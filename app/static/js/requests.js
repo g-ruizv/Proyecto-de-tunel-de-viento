@@ -17,6 +17,10 @@ function addController(id, controllerName) {
         return response.json();
     })
     .then(data => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         console.log('Response from server:', data);
     })
     .catch(error => {
@@ -43,8 +47,11 @@ function updateController() {
         return response.json();
     })
     .then(data => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         console.log('Success:', data);
-        // Optionally, close the modal and reset the form
         $('#controllerModal').modal('hide');
         document.getElementById('updateForm').reset();
     })
@@ -61,6 +68,10 @@ function getControllers() {
             return response.json();
         })
         .then(data => {
+            if (data.error){
+                showAlert(data.error, "warning");
+                return;
+            }
             const controllerSelect = document.getElementById('controllerSelect');
             controllerSelect.innerHTML = ''; // Clear previous options
             data.controllers.forEach(controller => {
@@ -91,6 +102,10 @@ function addMultipleControllers() {
         body: JSON.stringify(postData)
     })
     .then(response => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         if (!response.ok) {
         throw new Error('Network response was not ok');
         }
@@ -107,6 +122,10 @@ function getConfigurations() {
         return response.json();
         })
         .then(data => {
+            if (data.error){
+                showAlert(data.error, "warning");
+                return;
+            }
             const dropdown = document.getElementById('configDropdown');
             dropdown.innerHTML = ''; // Clear existing options
             console.log(data);
@@ -134,6 +153,10 @@ function getPresets() {
         return response.json();
         })
         .then(data => {
+            if (data.error){
+                showAlert(data.error, "warning");
+                return;
+            }
             const dropdown = document.getElementById('presetDropdown');
             dropdown.innerHTML = ''; // Clear existing options
             console.log(data);
@@ -167,6 +190,10 @@ function getSameSizePresets(){
             return response.json();
         })
         .then(data => {
+            if (data.error){
+                showAlert(data.error, "warning");
+                return;
+            }
             const dropdown = document.getElementById('presetDropdown');
             dropdown.innerHTML = ''; // Clear existing options
             console.log(data);
@@ -270,6 +297,11 @@ function savePreset(){
     })
     .then(data => {
         console.log('Response from server:', data);
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
+        
         getConfigurations();
     })
     .catch(error => {
@@ -299,6 +331,10 @@ function updateConfiguration(configurationId){
         return response.json();
     })
     .then(data => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         console.log('Response from server:', data);
     })
     .catch(error => {
@@ -316,6 +352,10 @@ function importConfiguration(configurationId){
         return response.json();
     })
     .then(data => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         console.log('Response from server:', data);
         importGridFromJSON(data.controllers);
         currentConfiguration.id = configurationId;
@@ -338,6 +378,10 @@ function importPreset(presetId){
         return response.json();
     })
     .then(data => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         console.log('Response from server:', data);
         currentPreset.id = presetId;
         currentPreset.name = data.name;
@@ -359,6 +403,10 @@ function runPreset(){
         return response.json();
     })
     .then(data => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         console.log('Response from server:', data);
     })
     .catch(error => {
@@ -376,6 +424,10 @@ function stopPreset(){
         return response.json();
     })
     .then(data => {
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
         console.log('Response from server:', data);
         stopProcedure()
     })
