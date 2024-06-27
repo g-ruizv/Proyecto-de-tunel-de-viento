@@ -97,3 +97,11 @@ let currentPreset = {
     id: null,
     name: null
 };
+
+function showAlert(message, type) {
+    var alertHtml = `<div class="alert alert-${type} alert-dismissible fade show warning-custom-alert" role="alert">
+                                ${message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                             </div>`;
+            $('#alert-placeholder').html(alertHtml);
+}
