@@ -38,6 +38,15 @@ getConfigurations();
 //getPresets();
 getSameSizePresets();
 updateSliders();
+var loadPresetButton = document.getElementById('loadPresetButton');
+loadPresetButton.classList.add('disabled');
+loadPresetButton.setAttribute('aria-disabled', 'true');
+
+grid.on('dragstop', function(event, element) {
+    loadPresetButton.classList.add('disabled');
+    loadPresetButton.setAttribute('aria-disabled', 'true');
+});
+
 
 function getValue(id) {
     console.log(id);
@@ -48,32 +57,10 @@ function getValue(id) {
     setControllerSpeed(value,id);
 }
 
-// Include other UI interaction functions here
-
-$(document).on('click', '#configDropdown .dropdown-item', function() {
-    // Handle configuration selection
-    var id = $(this).attr('id');
-    console.log('Configuration selected:', id);
-    importConfiguration(id);
-});
-$(document).on('click', '#presetDropdown .dropdown-item', function() {
-    // Handle configuration selection
-    var id = $(this).attr('id');
-    console.log('Configuration selected:', id);
-    importPreset(id);
-});
-
 function copyGridData() {
-    // Get data from the main grid
     var mainGridData = grid.save(false);
-
-    // Remove all widgets from the smaller grid
     smallGrid.removeAll();
-    
-    // Add widgets to the smaller grid
     mainGridData.forEach(function(widget) {
-
-        // Add the widget to the smaller grid
         smallGrid.addWidget({
             x: Math.floor(widget.x / 2),
             y: Math.floor(widget.y / 2),
@@ -83,8 +70,6 @@ function copyGridData() {
         });
     });
 }
-
-
 
 function updateSliders(){
     controllerIds.forEach(function(id){
@@ -135,6 +120,18 @@ $('#loadPresetModal').on('show.bs.modal', function () {
 
 $('#editControllerModal').on('show.bs.modal', getControllers);
 
+$(document).on('click', '#configDropdown .dropdown-item', function() {
+    var id = $(this).attr('id');
+    console.log('Configuration selected:', id);
+    loadPresetButton.classList.remove('disabled');
+    loadPresetButton.setAttribute('aria-disabled', 'false');
+    importConfiguration(id);
+});
+$(document).on('click', '#presetDropdown .dropdown-item', function() {
+    var id = $(this).attr('id');
+    console.log('Configuration selected:', id);
+    importPreset(id);
+});
 
 function calculateGradientColor(value, colorA, colorB) {
     var rA = parseInt(colorA.slice(1, 3), 16);
