@@ -41,7 +41,7 @@
                         Edit controller
                     </button>
                 </div>
-                <div class="col-md-3 d-flex align-items-center">
+                <div class="col-md-2 d-flex align-items-center">
                     <h6 class="mb-0">Configuration:</h6>
                     <span id="currentConfiguration" class="badge bg-secondary ms-2">None</span>
                 </div>                
@@ -59,7 +59,9 @@
                 <div class = "col-md-1">
                     <button class="btn btn-primary ml-2" onclick="updateConfiguration(currentConfiguration.id)">Save</button>
                 </div>
-                
+                <div class="col-md-1">
+                    <a class="btn btn-danger ml-2" href="{{ url_for('user.logout') }}">Logout</a>
+                </div>             
             </div>
             <div class="col-md-8">
                 <div class="grid-stack" gs-w="13" gs-min-row="12" ></div>
