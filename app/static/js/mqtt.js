@@ -13,7 +13,6 @@ mqttClient.onMessageArrived = function (message) {
 
 var options = {
     useSSL: true,
-    userName: 'fanWallInterface',
     timeout: 3,
     onSuccess: onConnect,
     onFailure: onConnectionLost,
