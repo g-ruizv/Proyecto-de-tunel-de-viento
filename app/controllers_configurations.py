@@ -67,7 +67,11 @@ def update_configuration(config_id):
         return {'error': 'Configuration not found'}, 404
     
     print(request.json)
-    for controller_id in request.json['controllers']:
+    
+    updated_controller_ids = set(request.json['controllers'].keys())
+    
+    # Update or add controller coordinates
+    for controller_id in updated_controller_ids:
         controller = Controller.query.get(controller_id)
         if controller is None:
             return {'error': f'Controller {controller_id} not found'}, 404
@@ -91,11 +95,19 @@ def update_configuration(config_id):
             )
             db.session.execute(controller_coord)
     
+    # Delete controller coordinates that are not in the request
+    all_coords = db.session.query(controllers_configurations).filter_by(configuration_id=config_id).all()
+    for coord in all_coords:
+        if coord.controller_id not in updated_controller_ids:
+            db.session.query(controllers_configurations).filter_by(controller_id=coord.controller_id, configuration_id=config_id).delete()
+    
     db.session.commit()
+    
     return {
         'configuration_id': config_id,
         'controllers': request.json['controllers']
     }
+
 
 
 @app.route('/api/v1/fanWall/configurations/<config_id>/remove_controller/<controller_id>', methods=['DELETE'])
