@@ -20,7 +20,13 @@ function importGridFromJSON(configuration) {
     console.log('Importing grid from JSON:', configuration);
     for (var key in configuration) {
         var cell = configuration[key];
-        var itemHtml = '<div class="unavailable"><br><br><label class="slider-label" for="' + key + '">' + key + '</label><input type="range" min="0" max="100" value="50" class="slider" id="' + key + '"></div>';
+        var itemHtml = `
+        <div class="unavailable grid-stack-item-content">
+            <button class="delete-button" onclick="deleteWidget('${key}')">&times;</button>
+            <br><br>
+            <label class="slider-label" for="${key}">${key}</label>
+            <input type="range" min="0" max="100" value="50" class="slider" id="${key}">
+        </div>`;
         grid.addWidget(itemHtml, {w: 2, h: 2, x: cell.x,y: cell.y,id:key ,noResize: true});
         controllerIds.push(key);
     }
