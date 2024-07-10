@@ -88,8 +88,24 @@ function addSlider(id){
     slider.onmouseup = function() {
         getValue();
     };
-    var itemHtml = '<div class="unavailable"><br><br><label class="slider-label" for="' + id + '">' + id + '</label><input type="range" min="0" max="100" value="50" class="slider" id="' + id + '"></div>';
+    var itemHtml = `
+        <div class="unavailable grid-stack-item-content">
+            <button class="delete-button" onclick="deleteWidget('${id}')">&times;</button>
+            <br><br>
+            <label class="slider-label" for="${id}">${id}</label>
+            <input type="range" min="0" max="100" value="50" class="slider" id="${id}">
+        </div>`;
     grid.addWidget(itemHtml, {w: 2, h: 2, id:id ,noResize: true});
+}
+
+function deleteWidget(id) {
+    console.log('Deleting widget:', id);
+    grid.removeWidget(document.getElementById(id).closest('.grid-stack-item'));
+    controllerIds = controllerIds.filter(function(value, index, arr) {
+        return value !== id;
+    });
+    loadPresetButton.classList.add('disabled');
+    loadPresetButton.setAttribute('aria-disabled', 'true');
 }
 
 function updateControllerAvailability(sliderId, isAvailable) {
