@@ -1,9 +1,11 @@
-from flask import request
+from flask import request, Blueprint
 from flask_cors import cross_origin
 from . import app, db
 from .models import Configuration
 
-@app.route('/api/v1/fanWall/configurations', methods=['GET'])
+configurationsBP = Blueprint('configurations', __name__)
+
+@configurationsBP.route('/api/v1/fanWall/configurations', methods=['GET'])
 @cross_origin()
 def get_configurations():
     configurations = Configuration.query.all()
@@ -12,7 +14,7 @@ def get_configurations():
         for configuration in configurations
         ]}
 
-@app.route('/api/v1/fanWall/configurations/<id>', methods=['POST'])
+@configurationsBP.route('/api/v1/fanWall/configurations/<id>', methods=['POST'])
 @cross_origin()
 def add_configuration(id):
     configuration = Configuration.query.get(id)
@@ -25,7 +27,7 @@ def add_configuration(id):
     else:
         return {'error': 'Configuration already exists'}
 
-@app.route('/api/v1/fanWall/configurations/<id>', methods=['DELETE'])
+@configurationsBP.route('/api/v1/fanWall/configurations/<id>', methods=['DELETE'])
 @cross_origin()
 def delete_configuration(id):
     configuration = Configuration.query.get(id)
@@ -33,7 +35,7 @@ def delete_configuration(id):
     db.session.commit()
     return {'id': configuration.id, 'name': configuration.name}
 
-@app.route('/api/v1/fanWall/configurations/<id>', methods=['GET'])
+@configurationsBP.route('/api/v1/fanWall/configurations/<id>', methods=['GET'])
 @cross_origin()
 def get_configuration(id):
     configuration = Configuration.query.get(id)
