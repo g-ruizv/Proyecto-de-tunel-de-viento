@@ -1,6 +1,6 @@
 import threading
 from time import sleep
-from flask import request
+from flask import request, Blueprint
 from flask_cors import cross_origin
 from flask_sqlalchemy import SQLAlchemy
 from . import app, db, mqtt_client
@@ -9,11 +9,13 @@ from .functions import generate_config_matrix, get_dimensions_from_preset, valid
 from .mqtt import mqtt_client, send_mqtt_message
 from .socket import send_fan_speed
 
+presetsBP = Blueprint('presets', __name__)
+
 preset_thread = None
 stop_event = threading.Event()
 
 
-@app.route('/api/v1/fanWall/presets', methods=['GET'])
+@presetsBP.route('/api/v1/fanWall/presets', methods=['GET'])
 @cross_origin()
 def get_presets():
     presets = Preset.query.all()
@@ -22,7 +24,7 @@ def get_presets():
         for preset in presets
         ]}
 
-@app.route('/api/v1/fanWall/presets/<id>', methods=['POST'])
+@presetsBP.route('/api/v1/fanWall/presets/<id>', methods=['POST'])
 @cross_origin()
 def add_preset(id):
     preset = Preset.query.get(id)
@@ -39,11 +41,12 @@ def add_preset(id):
     else:
         return {'error': 'Preset already exists'}
 
-@app.route('/api/v1/fanWall/presets', methods=['POST'])
+@presetsBP.route('/api/v1/fanWall/presets', methods=['POST'])
 @cross_origin()
 def add_new_preset():
     is_valid, error = validate_json(request.json['data'])
     if not is_valid:
+        print(error)
         return {'error': error}
     preset = Preset()
     preset.name = request.json['name']
@@ -52,7 +55,7 @@ def add_new_preset():
     db.session.commit()
     return {'id': preset.id, 'name': preset.name, 'data': preset.data}
     
-@app.route('/api/v1/fanWall/presets/<id>', methods=['DELETE'])
+@presetsBP.route('/api/v1/fanWall/presets/<id>', methods=['DELETE'])
 @cross_origin()
 def delete_preset(id):
     preset = Preset.query.get(id)
@@ -60,13 +63,13 @@ def delete_preset(id):
     db.session.commit()
     return {'id': preset.id, 'name': preset.name, 'data': preset.data}
 
-@app.route('/api/v1/fanWall/presets/<id>', methods=['GET'])
+@presetsBP.route('/api/v1/fanWall/presets/<id>', methods=['GET'])
 @cross_origin()
 def get_preset(id):
     preset = Preset.query.get(id)
     return {'id': preset.id, 'name': preset.name, 'data': preset.data}
 
-@app.route('/api/v1/fanWall/presets/same_size/<x>/<y>', methods=['GET'])
+@presetsBP.route('/api/v1/fanWall/presets/same_size/<x>/<y>', methods=['GET'])
 @cross_origin()
 def get_presets_of_size(x,y):
     presets = Preset.query.all()
@@ -77,7 +80,7 @@ def get_presets_of_size(x,y):
         ]}
 
 
-@app.route('/api/v1/fanWall/presets/<presetId>/configuration/<configId>', methods=['GET'])
+@presetsBP.route('/api/v1/fanWall/presets/<presetId>/configuration/<configId>', methods=['GET'])
 @cross_origin()
 def run_preset(presetId, configId):
     global preset_thread, stop_event
@@ -90,7 +93,7 @@ def run_preset(presetId, configId):
     return {'status': 'Preset running'}
 
 
-@app.route('/api/v1/fanWall/presets/<presetId>/configuration/<configId>/stop', methods=['GET'])
+@presetsBP.route('/api/v1/fanWall/presets/<presetId>/configuration/<configId>/stop', methods=['GET'])
 @cross_origin()
 def stop_preset(presetId, configId):
     global stop_event
