@@ -7,10 +7,14 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 import paho.mqtt.client as mqttPaho
 import threading
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['CORS_HEADERS'] = 'Content-Type'
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -18,6 +22,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'user.login'
 login_manager.login_message_category = 'info'
 socketio = SocketIO(app)
+socketio.init_app(app, cors_allowed_origins="*")
 cors = CORS(app)
 mqtt_client = mqttPaho.Client()
 
