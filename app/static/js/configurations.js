@@ -24,7 +24,7 @@ function importGridFromJSON(configuration) {
         <div class="unavailable grid-stack-item-content">
             <button class="delete-button" onclick="deleteWidget('${key}')">&times;</button>
             <br><br>
-            <label class="slider-label" for="${key}">${key}</label>
+            <label class="slider-label" for="${key}">${cell.name}</label>
             <input type="range" min="0" max="100" value="50" class="slider" id="${key}">
         </div>`;
         grid.addWidget(itemHtml, {w: 2, h: 2, x: cell.x,y: cell.y,id:key ,noResize: true});
