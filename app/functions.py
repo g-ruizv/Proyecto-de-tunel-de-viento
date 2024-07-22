@@ -58,12 +58,9 @@ def validate_json(json):
             return False, 'matrix must be a list'
         
         if len(frame['matrix']) != rows:
-            print(len(frame['matrix']))
-            print(rows)
             return False, 'all matrices must have the same number of rows'
         
         if len(frame['matrix'][0]) != cols:
-            print(len(frame['matrix'][0]))
             return False, 'all matrices must have the same number of columns'
         
         for row in frame['matrix']:
