@@ -66,6 +66,7 @@ Posteriormente a este mensaje podemos ingresar a la pagina de la interfaz que es
 
 
 ## Estructura del repositorio
+```
 FanWallInterface-copia/
 ├── app/
 │   ├── __init__.py           # Inicialización de Flask, SQLAlchemy, SocketIO
@@ -83,3 +84,4 @@ FanWallInterface-copia/
 ├── run.py                    # Punto de entrada de la aplicación
 ├── .env                      # Variables de entorno (no incluido en repo)
 └── README.md                 # Este documento
+```
