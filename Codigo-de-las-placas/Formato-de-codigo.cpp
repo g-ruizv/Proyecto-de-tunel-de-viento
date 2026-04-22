@@ -70,8 +70,9 @@ void setup() {
 
   // 2. Configurar pines PWM como salidas y apagar ventiladores
   for (int i = 0; i < 4; i++) {
-    pinMode(fanPins[i], OUTPUT);
-    digitalWrite(fanPins[i], LOW);
+    ledcSetup(i, 5000, 8);           // Canal, Frecuencia 5kHz, 8 bits
+    ledcAttachPin(fanPins[i], i);    // Asignar pin a canal
+    digitalWrite(fanPins[i], LOW);   // Apagar al inicio
   }
 
   // 3. Configurar pines TACH como entradas con pull-up y adjuntar interrupciones
@@ -175,10 +176,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
       JsonObject fan = fans[i];
       if (fan.containsKey("estado")) {
         fanStates[i] = fan["estado"];                       // Guardar nuevo estado
-        digitalWrite(fanPins[i], fanStates[i] ? HIGH : LOW); // Activar/desactivar pin
+        analogWrite(fanPins[i], fanStates[i] ? fanSpeeds[i] : 0); // Activar/desactivar pin
       }
       if (fan.containsKey("velocidad")) {
-        fanSpeeds[i] = fan["velocidad"];                    // Guardar velocidad (para futuro PWM)
+        fanSpeeds[i] = fan["velocidad"];
+        analogWrite(fanPins[i], fanSpeeds[i]);                    // Guardar velocidad (para futuro PWM)
       }
     }
   }
