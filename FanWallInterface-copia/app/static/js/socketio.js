@@ -1,4 +1,9 @@
-socket = io.connect('http://' + document.domain + ':' + location.port);
+socket = io({
+  transports: ['websocket','polling'],
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000
+});
 socket.on('connect', function() {
     console.log('Connected to server');
     socket.emit('my event', {data: 'I\'m connected!'});

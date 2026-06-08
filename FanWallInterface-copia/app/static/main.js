@@ -30,3 +30,4 @@ client.subscribe('my/test/topic');
 
 // publish message 'Hello' to topic 'my/test/topic'
 client.publish('my/test/topic', 'Hello');
+

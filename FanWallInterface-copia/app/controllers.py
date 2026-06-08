@@ -6,18 +6,22 @@ from .models import Controller
 
 controllerBP = Blueprint('controllers', __name__)
 
-@controllerBP.route('/api/v1/fanWall/controllers', methods=['GET'])
-@cross_origin()
-def get_controllers():
-    controllers = Controller.query.all()
-    return {'controllers': [{'id':controller.id,'name':controller.name}  
-                            for controller in controllers]}
-
 @controllerBP.route('/api/v1/fanWall/controllers/<id>', methods=['GET'])
 @cross_origin()
 def get_controller(id):
+    # Intentar buscar tal cual llega
     controller = Controller.query.get(id)
-    return {'id': controller.id, 'name': controller.name}
+    if controller:
+        return {'id': controller.id, 'name': controller.name}
+
+    # Probar la forma alternativa (':' <-> '-')
+    alt = id.replace(':', '-') if ':' in id else id.replace('-', ':')
+    controller = Controller.query.get(alt)
+    if controller:
+        return {'id': controller.id, 'name': controller.name}
+
+    # No encontrado -> devolver JSON claro y 404 (evita AttributeError/500)
+    return {'error': 'Controller not found'}, 404
 
 @controllerBP.route('/api/v1/fanWall/controllers/<id>', methods=['POST'])
 @cross_origin()

@@ -1,4 +1,7 @@
-var mqttClient = new Paho.MQTT.Client('broker.emqx.io', 8084, 'web-client-' + Math.random().toString(16).substr(2, 8));
+var clientId = 'web-client-' + Math.random().toString(16).substr(2, 8);
+
+// Opción A: HiveMQ (WS en puerto 8000) — útil para pruebas rápidas
+const mqttClient = new Paho.MQTT.Client('broker.emqx.io', 8084, clientId);
 
 mqttClient.onConnectionLost = function (responseObject) {
     if (responseObject.errorCode !== 0) {

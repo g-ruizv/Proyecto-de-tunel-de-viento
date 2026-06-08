@@ -32,8 +32,8 @@ def on_message(client, userdata, msg):
         message = payload.split('/')
         
         # Si la placa avisa que se acaba de conectar
-        if message[0] == 'Connected':
-            mac_address = message[1]
+        if len(message) > 1 and message[0] == 'Connected':
+            mac_address = message[1]  # usamos el formato tal cual llegó
             with app.app_context():
                 # Inicializar velocidad si no existe
                 if mac_address not in last_speeds:

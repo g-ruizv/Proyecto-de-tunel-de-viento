@@ -2,22 +2,58 @@ from . import app, db
 from .models import Configuration, Controller, controllers_configurations
 from .queries import *
 
-
-
-
 def generate_config_matrix(config_id):
-    controllers = get_matrix_from_config(config_id)
-    corners = get_config_corners(config_id)
-    print('corners')
-    print(corners)
-    if is_config_rectangle(config_id):
-        xSize, ySize = get_size_of_config(config_id)
-        matrix = [[None for _ in range(xSize)] for _ in range(ySize)]
-        for controller_coord in controllers:
-            matrix[int((controller_coord.y_coordinate-corners[1])/2)][int((controller_coord.x_coordinate-corners[0])/2)] = controller_coord[0].id
-        return matrix
-    else:
+    relations = db.session.query(controllers_configurations).filter_by(configuration_id=config_id).all()
+    if not relations:
+        print(f"No relations for config {config_id}")
         return None
+
+    # Obtener los nombres de las columnas del primer elemento
+    first = relations[0]
+    # Intentar detectar nombres de columnas
+    if hasattr(first, 'x'):
+        x_attr = 'x'
+        y_attr = 'y'
+    elif hasattr(first, 'x_coordinate'):
+        x_attr = 'x_coordinate'
+        y_attr = 'y_coordinate'
+    elif hasattr(first, 'pos_x'):
+        x_attr = 'pos_x'
+        y_attr = 'pos_y'
+    else:
+        # Si no, asumimos que está en la posición 2 y 3 (pero es frágil)
+        x_attr = None
+        y_attr = None
+
+    if x_attr is not None:
+        max_x = max([getattr(r, x_attr) for r in relations])
+        max_y = max([getattr(r, y_attr) for r in relations])
+    else:
+        # Fallback usando índices (suponiendo que la tabla tiene columnas: id, configuration_id, controller_id, x, y)
+        max_x = max([r[3] for r in relations])
+        max_y = max([r[4] for r in relations])
+
+    matrix = [[0 for _ in range(max_x + 1)] for _ in range(max_y + 1)]
+
+    for rel in relations:
+        if x_attr is not None:
+            x = getattr(rel, x_attr)
+            y = getattr(rel, y_attr)
+        else:
+            x = rel[3]
+            y = rel[4]
+        controller = db.session.get(Controller, rel.controller_id)
+        if controller:
+            try:
+                cid = int(controller.name.split('-')[1])
+            except:
+                cid = controller.id
+        else:
+            cid = 0
+        matrix[y][x] = cid
+
+    print("Generated matrix:", matrix)
+    return matrix
     
 def get_dimensions_from_preset(matrix):
     xSize = len(matrix[0])

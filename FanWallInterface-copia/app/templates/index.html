@@ -18,6 +18,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
 </head>
+
+<script>
+    window.currentPreset = null;
+    window.currentConfiguration = null;
+    // Cargar listas al inicio
+    document.addEventListener('DOMContentLoaded', function() {
+        getPresets();
+        getConfigurations();
+    });
+</script>
+
 <body class="container-fluid">
     <div id="alert-placeholder"></div>
     <div class="row">
@@ -173,5 +184,39 @@
     <script src="./static/js/socketMessageManager.js"></script>
     <script src="./static/js/requests.js"></script>
     <script src="./static/js/ui.js"></script>
+
+    <script src="./static/js/mqtt.js"></script>
+<script src="./static/js/configurations.js"></script>
+<script src="./static/js/mqttMessageManager.js"></script>
+<script src="./static/js/socketio.js"></script>
+<script src="./static/js/socketMessageManager.js"></script>
+<script src="./static/js/requests.js"></script>
+<script src="./static/js/ui.js"></script>
+
+<script>
+    // Inicializar variables globales
+    window.currentPreset = null;
+    window.currentConfiguration = null;
+
+    // Cargar presets y configuraciones al iniciar
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof getPresets === 'function') {
+            getPresets();
+            console.log('Presets cargados al inicio');
+        }
+        if (typeof getConfigurations === 'function') {
+            getConfigurations();
+        }
+    });
+
+    // Recargar presets al abrir el modal (opcional pero útil)
+    const loadPresetModal = document.getElementById('loadPresetModal');
+    if (loadPresetModal) {
+        loadPresetModal.addEventListener('show.bs.modal', function () {
+            getPresets();
+        });
+    }
+</script>
+
 </body>
 </html>

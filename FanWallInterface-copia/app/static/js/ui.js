@@ -179,7 +179,7 @@ function updateSmallGridItemColor(widgetId, value, colorA, colorB) {
 
 function addFanToGrid(id) {
     // Evitar duplicados si el slider ya existe
-    if (document.getElementById(id)) return;
+    if (document.getElementById(`slider-${id}`)) return;
 
     // El HTML que define el controlador (slider)
     var itemHtml = `
@@ -189,8 +189,10 @@ function addFanToGrid(id) {
             <strong style="font-size: 0.8rem;">ID: ${id}</strong>
             <br>
             <input type="range" min="0" max="255" value="0" class="form-range slider" id="slider-${id}" 
-                   oninput="setControllerSpeed(this.value, '${id}')">
-            <div class="mt-1">Potencia: <span id="val-${id}">0</span></div>
+                   oninput="updateSliderDisplay(this.value, '${id}'); setControllerSpeed(this.value, '${id}')">
+            <div class="mt-2">
+                <small style="color: #aaa;">Potencia: <strong id="val-${id}">0</strong>/255</small>
+            </div>
         </div>
     </div>`;
 
@@ -200,6 +202,14 @@ function addFanToGrid(id) {
     // Registrar el ID en tu lista global si no existe
     if (!controllerIds.includes(id)) {
         controllerIds.push(id);
+    }
+}
+
+// ✅ NUEVA FUNCIÓN: Actualizar el display del slider en tiempo real
+function updateSliderDisplay(value, id) {
+    var label = document.getElementById(`val-${id}`);
+    if (label) {
+        label.innerText = value;
     }
 }
 
