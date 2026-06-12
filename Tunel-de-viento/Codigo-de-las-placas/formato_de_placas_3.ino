@@ -5,7 +5,15 @@
 // ==========================================
 // CONFIGURACIÓN DE HARDWARE
 // ==========================================
-const int fanPins[4]  = {32, 25, 27, 4};   
+//   orden de los pins {j2, j3, j4, j5}
+//   original = {5, 16, 27, 13}
+//   modulo_5_7 = {17, 4, 26, 2}
+//   modulo_3 = {17, 16, 27, 2}
+//   modulo_2 = {17, 26, 16, 13}
+// ==========================================
+const int fanPins[4]  = {5, 16, 27, 13};  // no modificar, esta asi en el esquematico  
+const char* MODULE_NAME = "modulo-10"; 
+String moduleId = "";  
 #define LED_PIN 2
 
 // ==========================================
@@ -24,7 +32,7 @@ unsigned long lastIdPublish = 0;
 
 // Control de ventiladores (PWM)
 void setSpeeds(int speed) {
-  speed = constrain(speed, 0, 255);
+  speed = constrain(speed*2.55, 0, 255);
   for (int i = 0; i < 4; i++) {
     ledcWrite(fanPins[i], speed);
   }
@@ -67,14 +75,15 @@ void setup() {
     Serial.println("Portal agotado, intentando conectar con credenciales guardadas...");
   }
 
-  macAddress = WiFi.macAddress();
-  selfTopic = "fanWall/wall/" + macAddress; // Tópico único: fanWall/wall/XX:XX:XX...
+  //macAddress = WiFi.macAddress();
+  moduleId = String(MODULE_NAME);
+  selfTopic = "fanWall/wall/" + moduleId; // Tópico único: fanWall/wall/XX:XX:XX...
 
   client.setServer(mqttBroker, mqttPort);
   client.setCallback(callback);
   
   digitalWrite(LED_PIN, LOW);
-  Serial.println("Sistema iniciado. ID: " + macAddress);
+  Serial.println("Sistema iniciado. ID: " + moduleId);
 }
 
 void loop() {
@@ -82,18 +91,18 @@ void loop() {
   if (WiFi.status() == WL_CONNECTED) {
     if (!client.connected()) {
       unsigned long now = millis();
-      if (now - lastReconnectAttempt > 5000) {
+      if (now - lastReconnectAttempt > 500) {
         lastReconnectAttempt = now;
-        String clientId = "ESP32_Fisico_" + macAddress;
+        String clientId = "ESP32_" + moduleId;
         if (client.connect(clientId.c_str())) {
           // Suscribirse a los canales definidos en mqtt.py
           client.subscribe("fanWall/wall/id");
           client.subscribe(selfTopic.c_str());
           
           // Enviar estado inicial
-          String statusMsg = "Connected/" + macAddress;
+          String statusMsg = "Connected/" + moduleId;
           client.publish("fanWall/wall/status", statusMsg.c_str());
-          client.publish("fanWall/wall/id", macAddress.c_str());
+          client.publish("fanWall/wall/id", moduleId.c_str());
         }
       }
     } else {
@@ -103,7 +112,7 @@ void loop() {
       unsigned long now = millis();
       if (now - lastIdPublish > 20000) {
         lastIdPublish = now;
-        client.publish("fanWall/wall/id", macAddress.c_str());
+        client.publish("fanWall/wall/id", moduleId.c_str());
       }
     }
   }
