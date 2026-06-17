@@ -4,6 +4,33 @@ En este documento estará contenido la información de todo lo necesario para ej
 
 Esta interfaz corresponde al proyecto de FanWallInterface, que fue creado por Sebastian Trillos, cuyo repositorio es el siguiente: [FanWallInterface](https://github.com/elTrillos/FanWallInterface)
 
+## Pre-requisitos
+
+Para la ejecucion del programa es necesario instalar lo siguiente para el correcto funcionamiento de este codigo
+
+### Python 3.11
+El proyecto requiere **Python 3.11** específicamente. Otras versiones pueden causar errores de compatibilidad.
+
+Para esto es necesario ir a este link: [python.org/downloads](https://www.python.org/downloads/) y busca "Python 3.11.x" (la última versión de la rama 3.11, por ejemplo 3.11.9).
+
+### Node.js
+
+La interfaz ahora carga todas las librerías CSS/JS desde CDN (Internet), por lo que Node.js no es obligatorio para el funcionamiento básico. Sin embargo, si deseas trabajar sin conexión a Internet o modificar las dependencias, necesitarás Node.js.
+
+Para la instalacion tenemos que ir al siguiente link: [nodejs.org](https://nodejs.org/en)
+
+Ahora bien, para que se muestre de forma correcta la interfaz tenemos que instalar las siguientes dependencias en la carpeta `FanWallInterface-copia`.
+
+```bash
+npm install gridstack bootstrap @popperjs/core jquery socket.io-client paho-mqtt
+```
+
+Para que funcione bien hay que copiar la carpeta `node_modules/` a `app/static/`.
+
+```bash
+Copy-Item -Recurse -Force node_modules app\static\
+```
+
 ## Ejecución de la interfaz
 
 ## Prerrequisitos y Configuración Inicial
@@ -45,6 +72,12 @@ Si por error borramos la carpeta venv, que es donde esta la maquina virtual, par
 
 ```bash
 py -3.11 -m venv venv
+```
+
+En en el caso que nos de error o no nos de la autorizacion ponemos en el terminal lo siguiente.
+
+```bash
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 Es de vital importancia que la version de python sea 3.11, porque de caso contrario, se van a presentar variados errores por la interferencia de las versiones de los programas. Para que no pase esto, despues de activar la maquina virtual es necesario ejecutar el siguiente comando para tener instalado los siguientes requerimientos.
