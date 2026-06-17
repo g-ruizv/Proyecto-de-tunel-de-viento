@@ -110,7 +110,7 @@ void loop() {
       
       // Heartbeat: Publicar ID cada 20 seg para que el slider no desaparezca
       unsigned long now = millis();
-      if (now - lastIdPublish > 20000) {
+      if (now - lastIdPublish > 10000) {
         lastIdPublish = now;
         client.publish("fanWall/wall/id", moduleId.c_str());
       }

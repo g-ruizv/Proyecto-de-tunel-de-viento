@@ -1,33 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="./static/node_modules/gridstack/dist/gridstack-all.js"></script>
-    <link href="./static/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet"/>
-    <link href="./static/node_modules/gridstack/dist/gridstack-extra.min.css" rel="stylesheet"/>
-    <link rel="shortcut icon" href="./static/favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FanWall</title>
-    <link href="./static/css/index.css" rel="stylesheet"/>
+    
+    <!-- ========================================== -->
+    <!-- CDN Libraries (NO dependen de node_modules) -->
+    <!-- ========================================== -->
+    
     <!-- Bootstrap CSS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <link href="./static/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <script src="./static/node_modules/@popperjs/core/dist/umd/popper.js" rel="stylesheet"></script>
-    <script src="./static/node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
-    <!-- Paho JavaScript MQTT Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    
+    <!-- GridStack CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@10.2.0/dist/gridstack.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@10.2.0/dist/gridstack-extra.min.css" rel="stylesheet"/>
+    
+    <!-- Archivos locales -->
+    <link rel="shortcut icon" href="./static/favicon.ico">
+    <link href="./static/css/index.css" rel="stylesheet"/>
 </head>
-
-<script>
-    window.currentPreset = null;
-    window.currentConfiguration = null;
-    // Cargar listas al inicio
-    document.addEventListener('DOMContentLoaded', function() {
-        getPresets();
-        getConfigurations();
-    });
-</script>
 
 <body class="container-fluid">
     <div id="alert-placeholder"></div>
@@ -40,23 +32,23 @@
             <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#loadPresetModal" id="loadPresetButton">Load preset</button>
         </div>
         <div class="col-md-10">
-            <div class="top-bar d-flex justify-content-end mb-4">
-                <div class = "col-md-2">
+            <div class="top-bar d-flex justify-content-end align-items-center mb-4 flex-wrap">
+                <div class="col-auto">
                     <button class="btn btn-primary mb-2" onclick="getAllControllers()">Get controllers</button>
                 </div>
-                <div class = "col-md-1.5">
-                    <button class="btn btn-primary mb-2" onclick="addMultipleControllers()">Add Multiple Controllers</button>
+                <div class="col-auto">
+                    <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addMultipleControllersModal">Add Multiple Controllers</button>
                 </div>
-                <div class = "col-md-1">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editControllerModal">
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#editControllerModal">
                         Edit controller
                     </button>
                 </div>
-                <div class="col-md-2 d-flex align-items-center">
-                    <h6 class="mb-0">Configuration:</h6>
-                    <span id="currentConfiguration" class="badge bg-secondary ms-2">None</span>
+                <div class="col-auto d-flex align-items-center">
+                    <h6 class="mb-0 me-2">Configuration:</h6>
+                    <span id="currentConfiguration" class="badge bg-secondary">None</span>
                 </div>                
-                <div class = "col-md-2">
+                <div class="col-auto">
                     <div class="dropdown mb-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Select Configuration
@@ -64,21 +56,33 @@
                         <div class="dropdown-menu" id="configDropdown" aria-labelledby="dropdownMenuButton"></div>
                     </div>
                 </div>
-                <div class = "col-md-1">
+                <div class="col-auto">
                     <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal">Create New</button>
                 </div>
-                <div class = "col-md-1">
-                    <button class="btn btn-primary ml-2" onclick="updateConfiguration(currentConfiguration.id)">Save</button>
+                <div class="col-auto">
+                    <button class="btn btn-primary mb-2" onclick="updateConfiguration(currentConfiguration.id)">Save</button>
                 </div>
-                <div class="col-md-1">
-                    <a class="btn btn-danger ml-2" href="{{ url_for('user.logout') }}">Logout</a>
+                <!-- Nuevo botón: Gestionar Presets -->
+                <div class="col-auto">
+                    <button class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#managePresetsModal">Gestionar Presets</button>
+                </div>
+                <!-- Nuevo botón: Detener Servidor -->
+                <div class="col-auto">
+                    <button class="btn btn-warning mb-2" onclick="stopServer()">Detener Servidor</button>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-danger mb-2" href="{{ url_for('user.logout') }}">Logout</a>
                 </div>             
             </div>
             <div class="col-md-8">
-                <div class="grid-stack" gs-w="13" gs-min-row="12" ></div>
+                <div class="grid-stack" gs-w="13" gs-min-row="12"></div>
             </div>
         </div>
     </div>
+    
+    <!-- ========================================== -->
+    <!-- MODALES                                    -->
+    <!-- ========================================== -->
     
     <!-- Save configuration modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -111,7 +115,7 @@
                     <label for="newPresetNameInputBox">Configuration name</label>
                     <input type="text" class="form-control" id="newPresetNameInputBox" placeholder="Grid 1">
                     <label for="newPresetJsonInputBox">Preset JSON</label>
-                    <textarea  class="form-control" id="newPresetJsonInputBox" placeholder="JSON" rows="12"></textarea>
+                    <textarea class="form-control" id="newPresetJsonInputBox" placeholder="JSON" rows="12"></textarea>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary" onclick="savePreset()">Create</button>
@@ -120,11 +124,12 @@
         </div>
     </div>
 
+    <!-- Load preset modal -->
     <div class="modal fade" id="loadPresetModal" tabindex="-1" aria-labelledby="loadPresetModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="loadPresetModalLabel">Auto mode </h5>
+                    <h5 class="modal-title" id="loadPresetModalLabel">Auto mode</h5>
                     <div class="dropdown mb-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="presetDropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Select Preset
@@ -147,6 +152,7 @@
             </div>
         </div>
     </div>
+
     <!-- Edit controller modal -->
     <div class="modal fade" id="editControllerModal" tabindex="-1" aria-labelledby="editControllerModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -177,6 +183,107 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- MODAL: Add Multiple Controllers            -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="addMultipleControllersModal" tabindex="-1" aria-labelledby="addMultipleControllersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMultipleControllersModalLabel">Agregar múltiples controladores</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Ingresa los IDs y nombres de los controladores (uno por línea, formato: <code>id,nombre</code>). Ejemplo:</p>
+                    <pre>1,modulo-1
+2,modulo-2
+3,modulo-3</pre>
+                    <textarea class="form-control" id="controllersTextarea" rows="6" placeholder="1,modulo-1"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="addMultipleControllers()">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: Gestionar Presets                   -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="managePresetsModal" tabindex="-1" aria-labelledby="managePresetsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="managePresetsModalLabel">Gestionar Presets</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="presetsList">
+                        <!-- Aquí se cargará la lista dinámicamente -->
+                        <p class="text-muted">Cargando presets...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: Editar Preset                       -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="editPresetModal" tabindex="-1" aria-labelledby="editPresetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPresetModalLabel">Editar Preset</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editPresetId">
+                    <div class="mb-3">
+                        <label for="editPresetName" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="editPresetName" placeholder="Nombre del preset">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPresetJson" class="form-label">JSON del preset</label>
+                        <textarea class="form-control" id="editPresetJson" rows="8" placeholder="JSON"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEditedPreset()">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CDN JavaScript Libraries                   -->
+    <!-- ========================================== -->
+    
+    <!-- jQuery (necesario para Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Popper.js y Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- GridStack JS -->
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@10.2.0/dist/gridstack-all.js"></script>
+    
+    <!-- Paho MQTT -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+
+    <!-- ========================================== -->
+    <!-- Tus scripts locales                        -->
+    <!-- ========================================== -->
+    
     <script src="./static/js/mqtt.js"></script>
     <script src="./static/js/configurations.js"></script>
     <script src="./static/js/mqttMessageManager.js"></script>
@@ -185,38 +292,45 @@
     <script src="./static/js/requests.js"></script>
     <script src="./static/js/ui.js"></script>
 
-    <script src="./static/js/mqtt.js"></script>
-<script src="./static/js/configurations.js"></script>
-<script src="./static/js/mqttMessageManager.js"></script>
-<script src="./static/js/socketio.js"></script>
-<script src="./static/js/socketMessageManager.js"></script>
-<script src="./static/js/requests.js"></script>
-<script src="./static/js/ui.js"></script>
+    <!-- ========================================== -->
+    <!-- Inicialización y eventos                   -->
+    <!-- ========================================== -->
+    
+    <script>
+        // Inicializar variables globales
+        window.currentPreset = null;
+        window.currentConfiguration = null;
 
-<script>
-    // Inicializar variables globales
-    window.currentPreset = null;
-    window.currentConfiguration = null;
-
-    // Cargar presets y configuraciones al iniciar
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof getPresets === 'function') {
-            getPresets();
-            console.log('Presets cargados al inicio');
-        }
-        if (typeof getConfigurations === 'function') {
-            getConfigurations();
-        }
-    });
-
-    // Recargar presets al abrir el modal (opcional pero útil)
-    const loadPresetModal = document.getElementById('loadPresetModal');
-    if (loadPresetModal) {
-        loadPresetModal.addEventListener('show.bs.modal', function () {
-            getPresets();
+        // Cargar presets y configuraciones al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof getPresets === 'function') {
+                getPresets();
+                console.log('Presets cargados al inicio');
+            }
+            if (typeof getConfigurations === 'function') {
+                getConfigurations();
+            }
         });
-    }
-</script>
 
+        // Recargar presets al abrir el modal de carga
+        const loadPresetModal = document.getElementById('loadPresetModal');
+        if (loadPresetModal) {
+            loadPresetModal.addEventListener('show.bs.modal', function() {
+                getPresets();
+            });
+        }
+
+        // Cargar lista de presets al abrir el modal de gestión
+        const managePresetsModal = document.getElementById('managePresetsModal');
+        if (managePresetsModal) {
+            managePresetsModal.addEventListener('show.bs.modal', function() {
+                if (typeof loadPresetsList === 'function') {
+                    loadPresetsList();
+                } else {
+                    console.warn('loadPresetsList no está definida. Asegúrate de que requests.js la incluya.');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

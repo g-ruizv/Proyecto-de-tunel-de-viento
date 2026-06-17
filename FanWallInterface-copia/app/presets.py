@@ -176,3 +176,25 @@ def stop_preset(presetId, configId):
     # if preset_thread and preset_thread.is_alive():
     #     preset_thread.join(timeout=1.0)
     return {'status': 'Preset stopped'}
+
+@presetsBP.route('/api/v1/fanWall/presets/<id>', methods=['PUT'])
+@cross_origin()
+def update_preset(id):
+    preset = Preset.query.get(id)
+    if not preset:
+        return {'error': 'Preset not found'}, 404
+    data = request.json
+    if 'name' in data:
+        # Verificar nombre duplicado
+        existing = Preset.query.filter_by(name=data['name']).first()
+        if existing and existing.id != id:
+            return {'error': 'Ya existe un preset con ese nombre'}, 400
+        preset.name = data['name']
+    if 'data' in data:
+        # Validar JSON
+        is_valid, error = validate_json(data['data'])
+        if not is_valid:
+            return {'error': error}, 400
+        preset.data = data['data']
+    db.session.commit()
+    return {'id': preset.id, 'name': preset.name, 'data': preset.data}

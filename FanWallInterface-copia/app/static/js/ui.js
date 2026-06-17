@@ -3,7 +3,7 @@ var options = {
     cellWidth: '70px',
     column: 12,
     verticalMargin: 10,
-    minHeight: 4,
+    minHeight: 0,
     float: true,
 };
 
@@ -78,27 +78,37 @@ function updateSliders(){
     updateControllerAvailability("id1", true);
 }
 
-function addSlider(id){
-    var slider = document.createElement("input");
-    slider.type = "range";
-    slider.min = "0";
-    slider.max = "100";
-    slider.value = "50";
-    slider.id = "slider";
-    slider.onmouseup = function() {
-        getValue();
-    };
-    getController(id).then(function(controller){
-        var controllerName = controller.name;
-        var itemHtml = `
-            <div class="unavailable grid-stack-item-content">
-                <button class="delete-button" onclick="deleteWidget('${id}')">&times;</button>
-                <br><br>
-                <label class="slider-label" for="${id}">${controllerName}</label>
-                <input type="range" min="0" max="100" value="50" class="slider" id="${id}">
-            </div>`;
-        grid.addWidget(itemHtml, {w: 2, h: 2, id:id ,noResize: true});
-    });
+function addSlider(id) {
+    // Evitar duplicados
+    if (document.querySelector(`[gs-id="${id}"]`)) {
+        console.log("Slider ya existe:", id);
+        return;
+    }
+
+    // Añadir ID a la lista antes de crear el widget (para que el siguiente calcule bien)
+    if (!controllerIds.includes(id)) {
+        controllerIds.push(id);
+    }
+
+    var index = controllerIds.indexOf(id);
+    var colsPorFila = 6;
+    var x = (index % colsPorFila) * 2;
+    var y = Math.floor(index / colsPorFila) * 2;
+
+    var controllerName = id;
+    var itemHtml = `
+        <div class="unavailable grid-stack-item-content">
+            <button class="delete-button" onclick="deleteWidget('${id}')">&times;</button>
+            <br><br>
+            <label class="slider-label" for="${id}">${controllerName}</label>
+            <input type="range" min="0" max="100" value="50" class="slider" id="${id}">
+        </div>`;
+
+    grid.addWidget(itemHtml, { w: 2, h: 2, x: x, y: y, id: id, noResize: true });
+
+    if (typeof addController === 'function') {
+        addController(id, controllerName);
+    }
 }
 
 function deleteWidget(id) {

@@ -377,29 +377,27 @@ function importConfiguration(configurationId) {
                 showAlert(data.error, "warning");
                 return;
             }
-            // data.controllers debe ser una matriz (lista de listas) con los IDs de los controladores
             console.log('Configuration matrix:', data.controllers);
             
-            // Guardar la configuración completa
-            window.currentConfiguration = {
-                id: configurationId,
-                name: data.name,
-                matrix: data.controllers   // Guardamos la matriz aquí
-            };
+            // Actualizar ambas variables
+            currentConfiguration = { id: configurationId, name: data.name };
+            window.currentConfiguration = currentConfiguration;
             
-            // Mostrar en la interfaz
             const span = document.getElementById('currentConfiguration');
             if (span) span.textContent = data.name;
             
-            // Aplicar la matriz al grid visual
             if (typeof importGridFromJSON === 'function') {
                 importGridFromJSON(data.controllers);
             }
+            showAlert(`Configuración "${data.name}" cargada`, "success");
         })
-        .catch(error => console.error('Error importConfiguration:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error al cargar configuración', "danger");
+        });
 }
 
-function importPreset(presetId){
+function importPreset(presetId) {
     console.log('Importing preset...', presetId);
     fetch(`/api/v1/fanWall/presets/${presetId}`)
     .then(response => response.json())
@@ -408,12 +406,30 @@ function importPreset(presetId){
             showAlert(data.error, "warning");
             return;
         }
-        // Guardar en variable global
         window.currentPreset = { id: presetId, name: data.name };
-        // Mostrar el nombre en algún lugar (opcional)
         let span = document.getElementById('currentPreset');
         if (span) span.textContent = data.name;
         console.log('Preset cargado:', window.currentPreset);
+        showAlert(`Preset "${data.name}" cargado`, "success");
+
+        // ========== APLICAR MATRIZ DEL PRESET AL GRID ==========
+        if (data.data && data.data.frames && data.data.frames.length > 0) {
+            var matrix = data.data.frames[0].matrix; // Ej: [[0,3],[1,2]]
+            var config = {};
+            for (var y = 0; y < matrix.length; y++) {
+                for (var x = 0; x < matrix[y].length; x++) {
+                    var id = matrix[y][x];
+                    if (id !== 0) {
+                        var moduleId = "modulo-" + id;
+                        config[moduleId] = { x: x, y: y, name: moduleId };
+                    }
+                }
+            }
+            if (typeof importGridFromJSON === 'function') {
+                importGridFromJSON(config);
+            }
+        }
+        // ========================================================
     })
     .catch(error => console.error('Error importPreset:', error));
 }
@@ -465,5 +481,133 @@ function stopPreset(){
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
+    });
+}
+
+// ==========================================
+// GESTIÓN DE PRESETS (editar/eliminar)
+// ==========================================
+
+function loadPresetsList() {
+    const container = document.getElementById('presetsList');
+    if (!container) return;
+    container.innerHTML = '<p class="text-muted">Cargando presets...</p>';
+
+    fetch('/api/v1/fanWall/presets')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                container.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
+            }
+            if (!data.presets || data.presets.length === 0) {
+                container.innerHTML = '<p class="text-muted">No hay presets guardados.</p>';
+                return;
+            }
+            let html = '<ul class="list-group">';
+            data.presets.forEach(preset => {
+                html += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><strong>${preset.name}</strong> (ID: ${preset.id})</span>
+                        <div>
+                            <button class="btn btn-sm btn-primary me-1" onclick="openEditPresetModal(${preset.id})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePreset(${preset.id})">Eliminar</button>
+                        </div>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        })
+        .catch(error => {
+            container.innerHTML = `<div class="alert alert-danger">Error al cargar presets: ${error.message}</div>`;
+        });
+}
+
+function openEditPresetModal(presetId) {
+    fetch(`/api/v1/fanWall/presets/${presetId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showAlert(data.error, 'warning');
+                return;
+            }
+            document.getElementById('editPresetId').value = presetId;
+            document.getElementById('editPresetName').value = data.name;
+            document.getElementById('editPresetJson').value = JSON.stringify(data.data, null, 2);
+            const modal = new bootstrap.Modal(document.getElementById('editPresetModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error al cargar los datos del preset', 'danger');
+        });
+}
+
+function saveEditedPreset() {
+    const presetId = document.getElementById('editPresetId').value;
+    const newName = document.getElementById('editPresetName').value.trim();
+    const jsonText = document.getElementById('editPresetJson').value.trim();
+
+    if (!newName) {
+        showAlert('El nombre no puede estar vacío', 'warning');
+        return;
+    }
+
+    let newData;
+    try {
+        newData = JSON.parse(jsonText);
+    } catch (e) {
+        showAlert('El JSON no es válido. Revisa el formato.', 'danger');
+        return;
+    }
+
+    const postData = { name: newName, data: newData };
+
+    fetch(`/api/v1/fanWall/presets/${presetId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showAlert(data.error, 'warning');
+            return;
+        }
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editPresetModal'));
+        if (modal) modal.hide();
+        showAlert('Preset actualizado correctamente', 'success');
+        loadPresetsList();        // recargar lista
+        getPresets();            // actualizar dropdown
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error al actualizar el preset', 'danger');
+    });
+}
+
+function deletePreset(presetId) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este preset? Esta acción no se puede deshacer.')) {
+        return;
+    }
+
+    fetch(`/api/v1/fanWall/presets/${presetId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showAlert(data.error, 'warning');
+            return;
+        }
+        showAlert('Preset eliminado correctamente', 'success');
+        loadPresetsList();
+        getPresets();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error al eliminar el preset', 'danger');
     });
 }
