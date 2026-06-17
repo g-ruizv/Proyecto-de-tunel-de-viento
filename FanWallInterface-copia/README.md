@@ -31,13 +31,7 @@ Para que funcione bien hay que copiar la carpeta `node_modules/` a `app/static/`
 Copy-Item -Recurse -Force node_modules app\static\
 ```
 
-## Ejecución de la interfaz
-
-## Prerrequisitos y Configuración Inicial
-
-Antes de ejecutar la interfaz, es necesario tener configurados los siguientes servicios externos:
-
-### 1. Variables de Entorno (Archivo `.env`)
+### Variables de Entorno (Archivo `.env`)
 El programa busca credenciales sensibles en un archivo llamado `.env` en la raíz del proyecto. **Si este archivo no existe, la aplicación no iniciará.**
 
 Crea un archivo `.env` y pega lo siguiente (ajusta los valores a tu equipo):
@@ -51,6 +45,8 @@ PORT=5000
 MQTT_BROKER=broker.emqx.io
 MQTT_PORT=1883
 ```
+
+## Ejecución de la interfaz
 
 En primer lugar tenemos que asegurarnos que estamos en la carpeta indicada para esto inicia en la carpeta en vscode o si estas afuera de la carpeta ejecuta el siguiente comando
 
