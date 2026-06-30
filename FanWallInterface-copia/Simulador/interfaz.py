@@ -2,6 +2,7 @@
 """
 Interfaz Tkinter para visualizar el estado de los módulos FanWall.
 Se suscribe a fanWall/wall/estado/# para recibir velocidades actualizadas.
+Muestra cualquier módulo (sin filtro de prefijo).
 """
 
 import tkinter as tk
@@ -15,7 +16,7 @@ MQTT_PORT = 1883
 class FanWallDashboard:
     def __init__(self, root):
         self.root = root
-        self.root.title("FanWall Dashboard - Simulador")
+        self.root.title("FanWall Dashboard - Simulador ESP32")
         self.root.geometry("900x700")
         self.root.configure(bg='#1a1a2e')
         
@@ -48,11 +49,11 @@ class FanWallDashboard:
         self.canvas.pack(side='left', fill='both', expand=True, padx=10, pady=10)
         scrollbar.pack(side='right', fill='y')
         
-        # Grid de módulos (2 columnas)
+        # Grid de módulos (4 columnas)
         self.grid_frame = tk.Frame(self.scrollable_frame, bg='#1a1a2e')
         self.grid_frame.pack(fill='both', expand=True)
-        self.grid_frame.grid_columnconfigure(0, weight=1)
-        self.grid_frame.grid_columnconfigure(1, weight=1)
+        for col in range(4):
+            self.grid_frame.grid_columnconfigure(col, weight=1)
         
         # Leyenda
         bottom_frame = tk.Frame(self.root, bg='#1a1a2e')
@@ -99,21 +100,20 @@ class FanWallDashboard:
     def add_module(self, module_id):
         if module_id in self.modules:
             return
-    
-        COLUMNAS = 4  # Número de columnas (puedes usar 6 si quieres más horizontal)
+        
+        COLUMNAS = 4
         row = self.module_counter // COLUMNAS
         col = self.module_counter % COLUMNAS
         self.module_counter += 1
-    
+        
         module_frame = tk.Frame(self.grid_frame, bg='#16213e', bd=2, relief='solid',
-                            borderwidth=1, highlightbackground='#0f3460', highlightthickness=2)
+                                borderwidth=1, highlightbackground='#0f3460', highlightthickness=2)
         module_frame.grid(row=row, column=col, padx=10, pady=10, sticky='nsew')
-    
-    # Configurar peso de columnas para que se expandan
+        
         self.grid_frame.grid_columnconfigure(col, weight=1)
         self.grid_frame.grid_rowconfigure(row, weight=1)
         
-        title = tk.Label(module_frame, text=module_id, font=('Segoe UI', 14, 'bold'),
+        title = tk.Label(module_frame, text=f"Módulo {module_id}", font=('Segoe UI', 14, 'bold'),
                          fg='#e94560', bg='#16213e')
         title.pack(pady=(5,10))
         
@@ -173,13 +173,12 @@ class FanWallDashboard:
         topic = msg.topic
         payload = msg.payload.decode().strip()
         if topic == "fanWall/wall/id":
-            # Si llega un heartbeat de un módulo nuevo, añadirlo (si no existe)
-            if payload.startswith('modulo-'):
-                if payload not in self.modules:
-                    self.root.after(0, lambda: self.add_module(payload))
+            # Si llega un heartbeat de un módulo, añadirlo (si no existe)
+            if payload and payload not in self.modules:
+                self.root.after(0, lambda: self.add_module(payload))
         elif topic.startswith("fanWall/wall/estado/"):
             module_id = topic.split('/')[-1]
-            if module_id.startswith('modulo-'):
+            if module_id:
                 try:
                     speed = int(payload)
                     self.root.after(0, lambda: self.update_module(module_id, speed))

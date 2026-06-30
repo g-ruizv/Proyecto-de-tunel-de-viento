@@ -128,10 +128,9 @@ function addMultipleControllers() {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        return response.json(); // PRIMERO CONVIERTE A JSON
+        return response.json();
     })
     .then(data => {
-        // AHORA SÍ PUEDES USAR 'data'
         if (data.error){
             showAlert(data.error, "warning");
             return;
@@ -190,7 +189,6 @@ function getPresets() {
             option.href = '#';
             option.id = `${preset.id}`;
             option.textContent = `Preset ${preset.name}`;
-            // 👇 AÑADE ESTE MANEJADOR
             option.addEventListener('click', (e) => {
                 e.preventDefault();
                 importPreset(preset.id);
@@ -226,7 +224,7 @@ function getSameSizePresets(){
             data.presets.forEach(preset => {
                 const option = document.createElement('a');
                 option.classList.add('dropdown-item');
-                option.href = '#'; // Add link behavior if needed
+                option.href = '#';
                 console.log(preset);
                 option.id = `${preset.id}`;
                 option.textContent = `Preset ${preset.name}`;
@@ -266,8 +264,7 @@ function createConfiguration(id, configurationName){
 
 function saveConfiguration(){
     console.log('Saving configuration...');
-    configurationName= document.getElementById('newConfigurationNameInputBox').value;
-    id = null;
+    const configurationName = document.getElementById('newConfigurationNameInputBox').value;
     const configurationMatrix = exportGridAsMatrix();
     const postData = {
         name: configurationName,
@@ -289,10 +286,15 @@ function saveConfiguration(){
     })
     .then(data => {
         console.log('Response from server:', data);
-        currentConfiguration.id = data.id;
-        currentConfiguration.name = configurationName;
+        if (data.error){
+            showAlert(data.error, "warning");
+            return;
+        }
+        // Actualizar variables globales
+        window.currentConfiguration = { id: data.configuration_id, name: configurationName };
         document.getElementById('currentConfiguration').textContent = data.name;
         getConfigurations();
+        showAlert(`Configuración "${data.name}" creada`, "success");
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -310,32 +312,46 @@ function savePreset(){
 
     fetch(`/api/v1/fanWall/presets`, {
         method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData)
     })
     .then(response => {
         if (!response.ok) {
-        throw new Error('Network response was not ok');
+            return response.json().then(err => { throw new Error(err.error || 'Error al guardar'); });
         }
         return response.json();
     })
     .then(data => {
         console.log('Response from server:', data);
-        if (data.error){
+        if (data.error) {
             showAlert(data.error, "warning");
             return;
         }
-        
-        getConfigurations();
+        // 🔄 Recargar lista de presets en el dropdown
+        getPresets();
+        // Si el modal de gestión está abierto, actualizar también
+        if (typeof loadPresetsList === 'function') {
+            loadPresetsList();
+        }
+        showAlert(`Preset "${data.name}" guardado`, "success");
+        // Limpiar campos
+        document.getElementById('newPresetNameInputBox').value = '';
+        document.getElementById('newPresetJsonInputBox').value = '';
+        // Cerrar modal
+        $('#savePresetModal').modal('hide');
     })
     .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
+        console.error('Error:', error);
+        showAlert(error.message || 'Error al guardar el preset', 'danger');
     });
 }
 
-function updateConfiguration(configurationId){
+function updateConfiguration(){
+    const configId = window.currentConfiguration ? window.currentConfiguration.id : null;
+    if (!configId) {
+        showAlert('No hay configuración cargada', "warning");
+        return;
+    }
     console.log('Updating configuration...');
     const configurationMatrix = exportGridAsMatrix();
     const postData = {
@@ -343,7 +359,7 @@ function updateConfiguration(configurationId){
     };
     console.log(postData);
 
-    fetch(`/api/v1/fanWall/configurations/${configurationId}/controllers`, {
+    fetch(`/api/v1/fanWall/configurations/${configId}/controllers`, {
         method: 'PATCH',
         headers: {
         'Content-Type': 'application/json',
@@ -362,6 +378,7 @@ function updateConfiguration(configurationId){
             return;
         }
         console.log('Response from server:', data);
+        showAlert('Configuración actualizada', "success");
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -379,15 +396,17 @@ function importConfiguration(configurationId) {
             }
             console.log('Configuration matrix:', data.controllers);
             
-            // Actualizar ambas variables
-            currentConfiguration = { id: configurationId, name: data.name };
-            window.currentConfiguration = currentConfiguration;
-            
+            window.currentConfiguration = { id: configurationId, name: data.name };
             const span = document.getElementById('currentConfiguration');
             if (span) span.textContent = data.name;
             
-            if (typeof importGridFromJSON === 'function') {
-                importGridFromJSON(data.controllers);
+            try {
+                if (typeof importGridFromJSON === 'function') {
+                    importGridFromJSON(data.controllers);
+                }
+            } catch (e) {
+                console.error('Error importing grid:', e);
+                showAlert('Error al cargar la configuración en el grid', 'danger');
             }
             showAlert(`Configuración "${data.name}" cargada`, "success");
         })
@@ -412,9 +431,9 @@ function importPreset(presetId) {
         console.log('Preset cargado:', window.currentPreset);
         showAlert(`Preset "${data.name}" cargado`, "success");
 
-        // ========== APLICAR MATRIZ DEL PRESET AL GRID ==========
+        // Aplicar matriz del preset al grid
         if (data.data && data.data.frames && data.data.frames.length > 0) {
-            var matrix = data.data.frames[0].matrix; // Ej: [[0,3],[1,2]]
+            var matrix = data.data.frames[0].matrix;
             var config = {};
             for (var y = 0; y < matrix.length; y++) {
                 for (var x = 0; x < matrix[y].length; x++) {
@@ -429,19 +448,16 @@ function importPreset(presetId) {
                 importGridFromJSON(config);
             }
         }
-        // ========================================================
     })
     .catch(error => console.error('Error importPreset:', error));
 }
 
 function runPreset(){
-    // Verificar que haya un preset cargado
     if (!window.currentPreset || !window.currentPreset.id) {
         console.error("No preset loaded. Please load a preset first.");
         showAlert("No preset loaded", "warning");
         return;
     }
-    // Verificar que haya una configuración cargada
     if (!window.currentConfiguration || !window.currentConfiguration.id) {
         console.error("No configuration loaded. Please load a configuration first.");
         showAlert("No configuration loaded", "warning");
@@ -463,8 +479,16 @@ function runPreset(){
 }
 
 function stopPreset(){
+    if (!window.currentPreset || !window.currentPreset.id) {
+        showAlert("No preset loaded", "warning");
+        return;
+    }
+    if (!window.currentConfiguration || !window.currentConfiguration.id) {
+        showAlert("No configuration loaded", "warning");
+        return;
+    }
     console.log('Stopping preset...');
-    fetch(`/api/v1/fanWall/presets/${currentPreset.id}/configuration/${currentConfiguration.id}/stop`)
+    fetch(`/api/v1/fanWall/presets/${window.currentPreset.id}/configuration/${window.currentConfiguration.id}/stop`)
     .then(response => {
         if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -477,17 +501,15 @@ function stopPreset(){
             return;
         }
         console.log('Response from server:', data);
-        stopProcedure()
+        stopProcedure();
+        showAlert('Preset detenido', "success");
     })
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
     });
 }
 
-// ==========================================
 // GESTIÓN DE PRESETS (editar/eliminar)
-// ==========================================
-
 function loadPresetsList() {
     const container = document.getElementById('presetsList');
     if (!container) return;
@@ -578,8 +600,8 @@ function saveEditedPreset() {
         const modal = bootstrap.Modal.getInstance(document.getElementById('editPresetModal'));
         if (modal) modal.hide();
         showAlert('Preset actualizado correctamente', 'success');
-        loadPresetsList();        // recargar lista
-        getPresets();            // actualizar dropdown
+        loadPresetsList();
+        getPresets();
     })
     .catch(error => {
         console.error('Error:', error);

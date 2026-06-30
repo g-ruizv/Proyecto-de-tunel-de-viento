@@ -62,13 +62,13 @@
                 <div class="col-auto">
                     <button class="btn btn-primary mb-2" onclick="updateConfiguration(currentConfiguration.id)">Save</button>
                 </div>
-                <!-- Nuevo botón: Gestionar Presets -->
+                <!-- Botón: Gestionar Presets -->
                 <div class="col-auto">
                     <button class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#managePresetsModal">Gestionar Presets</button>
                 </div>
-                <!-- Nuevo botón: Detener Servidor -->
+                <!-- Botón: Ver Distribución -->
                 <div class="col-auto">
-                    <button class="btn btn-warning mb-2" onclick="stopServer()">Detener Servidor</button>
+                    <button class="btn btn-info mb-2" data-bs-toggle="modal" data-bs-target="#distributionModal">Ver Distribución</button>
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-danger mb-2" href="{{ url_for('user.logout') }}">Logout</a>
@@ -261,6 +261,26 @@
     </div>
 
     <!-- ========================================== -->
+    <!-- MODAL: Distribución de Configuración       -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="distributionModal" tabindex="-1" aria-labelledby="distributionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="distributionModalLabel">Distribución de la Configuración</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="distributionContent">
+                    <p class="text-muted">Cargando...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- CDN JavaScript Libraries                   -->
     <!-- ========================================== -->
     
@@ -328,6 +348,18 @@
                     loadPresetsList();
                 } else {
                     console.warn('loadPresetsList no está definida. Asegúrate de que requests.js la incluya.');
+                }
+            });
+        }
+
+        // Al abrir el modal de distribución, cargar datos
+        const distributionModal = document.getElementById('distributionModal');
+        if (distributionModal) {
+            distributionModal.addEventListener('show.bs.modal', function() {
+                if (typeof showDistribution === 'function') {
+                    showDistribution();
+                } else {
+                    console.warn('showDistribution no está definida. Asegúrate de que ui.js la incluya.');
                 }
             });
         }

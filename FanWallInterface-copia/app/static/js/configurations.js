@@ -15,8 +15,13 @@ function exportGridAsMatrix() {
 };
 
 function importGridFromJSON(configuration) {
+    if (!grid) {
+        console.error('Grid no inicializado');
+        return;
+    }
+    // Eliminar todos los widgets actuales
     grid.removeAll();
-    controllerIds = [];
+    window.controllerIds = [];
     console.log('Importing grid from JSON:', configuration);
     for (var key in configuration) {
         var cell = configuration[key];
@@ -27,10 +32,9 @@ function importGridFromJSON(configuration) {
             <label class="slider-label" for="${key}">${cell.name}</label>
             <input type="range" min="0" max="100" value="50" class="slider" id="${key}">
         </div>`;
-        grid.addWidget(itemHtml, {w: 2, h: 2, x: cell.x,y: cell.y,id:key ,noResize: true});
-        controllerIds.push(key);
+        grid.addWidget(itemHtml, {w: 2, h: 2, x: cell.x, y: cell.y, id: key, noResize: true});
+        window.controllerIds.push(key);
     }
-    
 }
 
 function areGridItemsRectangular(){
